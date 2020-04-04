@@ -1,0 +1,10 @@
+version: '3.7'
+
+services:
+    ledger.webapi:
+        image: ${DOCKER_REGISTRY-}ledgerwebapi
+        build:
+            context: .
+            dockerfile: "src/Ledger.WebApi/Dockerfile"
+        ports:
+            - "8080:80"
