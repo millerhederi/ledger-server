@@ -8,3 +8,32 @@ services:
             dockerfile: "src/Ledger.WebApi/Dockerfile"
         ports:
             - "8080:80"
+        depends_on:
+            - "db"
+        environment: 
+            Ledger_ConnectionStrings__DefaultConnection: "Server=db;Database=Ledger;User Id=sa;Password=Password123!"
+    
+    db:
+        image: "mcr.microsoft.com/mssql/server:2019-latest"
+        volumes:
+            - dbdata:/var/opt/mssql
+        environment: 
+            SA_PASSWORD: "Password123!"
+            ACCEPT_EULA: "Y"
+        ports: 
+            - "1433:1433"
+        logging:
+            driver: "none"
+
+    ledger.dbup:
+        image: ${DOCKER_REGISTRY-}ledgerdbup
+        build:
+            context: .
+            dockerfile: "src/Ledger.DatabaseInstaller/Dockerfile"
+        depends_on:
+            - "db"
+        environment: 
+            Ledger_ConnectionStrings__DefaultConnection: "Server=db;Database=Ledger;User Id=sa;Password=Password123!"
+
+volumes:
+    dbdata:

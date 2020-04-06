@@ -18,6 +18,10 @@ namespace Ledger.WebApi
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((hostBuilder, configBuilder) =>
+                {
+                    configBuilder.AddEnvironmentVariables(prefix: "Ledger_");
+                })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
