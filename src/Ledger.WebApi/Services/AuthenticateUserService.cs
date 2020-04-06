@@ -3,6 +3,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Dapper;
+using Ledger.WebApi.Concept;
+using Ledger.WebApi.DataAccess;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
@@ -16,22 +19,34 @@ namespace Ledger.WebApi.Services
     public class AuthenticateUserService : IAuthenticateUserService
     {
         private readonly IConfiguration _configuration;
-        
+        private readonly IRepository _repository;
+
         public AuthenticateUserService(
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IRepository repository)
         {
             _configuration = configuration;
+            _repository = repository;
         }
 
-        public Task<string> ExecuteAsync(string userName, string password, CancellationToken cancellationToken)
+        public async Task<string> ExecuteAsync(string userName, string password, CancellationToken cancellationToken)
         {
-            // Todo: hard coding username and password until we've added a DB backend
-            if (userName != "user" || password != "password")
+            var parameters = new DynamicParameters();
+            parameters.Add("UserName", userName);
+
+            var user = await _repository
+                .QuerySingleOrDefaultAsync<User>(new CommandDefinition(
+                    "select * from [dbo].[User] where [UserName] = @UserName",
+                    parameters,
+                    cancellationToken: cancellationToken));
+
+            // Todo: hard coding the password for now until we research hashing options
+            if (user == null || password != "password")
             {
                 return null;
             }
 
-            return Task.FromResult(BuildToken());
+            return BuildToken();
         }
         
         private string BuildToken()

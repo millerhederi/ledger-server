@@ -1,4 +1,5 @@
 using System.Text;
+using Ledger.WebApi.Concept;
 using Ledger.WebApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -41,6 +42,7 @@ namespace Ledger.WebApi
             services.AddControllers();
             
             services.AddTransient<IAuthenticateUserService, AuthenticateUserService>();
+            services.AddTransient<IRepository, Repository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
