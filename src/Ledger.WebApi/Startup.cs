@@ -1,5 +1,6 @@
 using System.Text;
 using Ledger.WebApi.Concept;
+using Ledger.WebApi.Filters;
 using Ledger.WebApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -38,11 +39,15 @@ namespace Ledger.WebApi
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
                     };
                 });
-            
-            services.AddControllers();
-            
+
+            services.AddControllers(options =>
+            {
+                options.Filters.Add<RequestContextFilter>();
+            });
+
             services.AddTransient<IAuthenticateUserService, AuthenticateUserService>();
             services.AddTransient<IRepository, Repository>();
+            services.AddScoped<IRequestContext, RequestContext>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

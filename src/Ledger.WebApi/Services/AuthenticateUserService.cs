@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,6 +19,8 @@ namespace Ledger.WebApi.Services
 
     public class AuthenticateUserService : IAuthenticateUserService
     {
+        public const string UserIdClaimName = "UserId";
+
         private readonly IConfiguration _configuration;
         private readonly IRepository _repository;
 
@@ -46,18 +49,23 @@ namespace Ledger.WebApi.Services
                 return null;
             }
 
-            return BuildToken();
+            return BuildToken(user);
         }
         
-        private string BuildToken()
+        private string BuildToken(User user)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
+            var claims = new[]
+            {
+                new Claim(UserIdClaimName, user.Id.ToString()),
+            };
+
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Issuer"],
-                claims: null,
+                claims: claims,
                 expires: DateTime.Now.AddMinutes(30),
                 signingCredentials: credentials);
 
