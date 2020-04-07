@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,6 +10,10 @@ namespace Ledger.WebApi.Concept
 {
     public interface IRepository
     {
+        Task<int> ExecuteAsync(CommandDefinition command);
+
+        Task<IEnumerable<T>> QueryAsync<T>(CommandDefinition command);
+
         Task<T> QuerySingleOrDefaultAsync<T>(CommandDefinition command);
     }
 
@@ -23,11 +28,27 @@ namespace Ledger.WebApi.Concept
 
         private string ConnectionString => _configuration.GetConnectionString("DefaultConnection");
 
+        public async Task<int> ExecuteAsync(CommandDefinition command)
+        {
+            using (var cn = await CreateConnectionAsync(command.CancellationToken))
+            {
+                return await cn.ExecuteAsync(command);
+            }
+        }
+
+        public async Task<IEnumerable<T>> QueryAsync<T>(CommandDefinition command)
+        {
+            using (var cn = await CreateConnectionAsync(command.CancellationToken))
+            {
+                return await cn.QueryAsync<T>(command);
+            }
+        }
+
         public async Task<T> QuerySingleOrDefaultAsync<T>(CommandDefinition command)
         {
-            using (var cn = await CreateConnectionAsync(command.CancellationToken).ConfigureAwait(false))
+            using (var cn = await CreateConnectionAsync(command.CancellationToken))
             {
-                return await cn.QuerySingleOrDefaultAsync<T>(command).ConfigureAwait(false);
+                return await cn.QuerySingleOrDefaultAsync<T>(command);
             }
         }
 

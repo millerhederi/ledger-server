@@ -21,6 +21,16 @@ namespace Ledger.WebApi
 
         public IConfiguration Configuration { get; }
 
+        public static void ConfigureIoc(IServiceCollection services)
+        {
+            services.AddTransient<IAuthenticateUserService, AuthenticateUserService>();
+            services.AddTransient<IGetTransactionService, GetTransactionService>();
+            services.AddTransient<IGetTransactionsService, GetTransactionsService>();
+            services.AddTransient<IInsertTransactionService, InsertTransactionService>();
+            services.AddTransient<IRepository, Repository>();
+            services.AddScoped<IRequestContext, RequestContext>();
+        }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -45,9 +55,7 @@ namespace Ledger.WebApi
                 options.Filters.Add<RequestContextFilter>();
             });
 
-            services.AddTransient<IAuthenticateUserService, AuthenticateUserService>();
-            services.AddTransient<IRepository, Repository>();
-            services.AddScoped<IRequestContext, RequestContext>();
+            ConfigureIoc(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
