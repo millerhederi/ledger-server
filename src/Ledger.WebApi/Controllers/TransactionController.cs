@@ -57,5 +57,17 @@ namespace Ledger.WebApi.Controllers
         {
             return await _upsertTransactionService.ExecuteAsync(transaction, cancellationToken);
         }
+
+        [HttpPut]
+        [Route("{id}")]
+        public async Task<Guid> UpdateTransactionAsync(
+            [FromRoute] Guid id,
+            [FromBody] TransactionModel transaction,
+            CancellationToken cancellationToken)
+        {
+            transaction.Id = id;
+
+            return await _upsertTransactionService.ExecuteAsync(transaction, cancellationToken);
+        }
     }
 }
