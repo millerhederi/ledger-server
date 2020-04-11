@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using Ledger.WebApi.Concept;
+using Ledger.WebApi.DataAccess;
 using Ledger.WebApi.Models;
 
 namespace Ledger.WebApi.Services
@@ -40,7 +41,20 @@ where UserId = @UserId
 
             var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
 
-            return await _repository.QuerySingleOrDefaultAsync<TransactionModel>(command);
+            var transaction = await _repository.QuerySingleOrDefaultAsync<Transaction>(command);
+
+            if (transaction == null)
+            {
+                return null;
+            }
+
+            return new TransactionModel
+            {
+                Id = transaction.Id,
+                PostedDate = transaction.PostedDate,
+                Amount = transaction.Amount,
+                Description = transaction.Description,
+            };
         }
     }
 }
