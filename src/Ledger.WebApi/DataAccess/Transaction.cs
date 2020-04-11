@@ -1,8 +1,9 @@
 ﻿using System;
+using Ledger.WebApi.Concept;
 
 namespace Ledger.WebApi.DataAccess
 {
-    public class Transaction
+    public class Transaction : IEntity
     {
         public Guid Id { get; set; }
         public Guid UserId { get; set; }

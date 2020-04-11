@@ -16,16 +16,16 @@ namespace Ledger.WebApi.Controllers
     {
         private readonly IGetTransactionService _getTransactionService;
         private readonly IGetTransactionsService _getTransactionsService;
-        private readonly IInsertTransactionService _insertTransactionService;
+        private readonly IUpsertTransactionService _upsertTransactionService;
 
         public TransactionController(
             IGetTransactionService getTransactionService,
             IGetTransactionsService getTransactionsService,
-            IInsertTransactionService insertTransactionService)
+            IUpsertTransactionService upsertTransactionService)
         {
             _getTransactionService = getTransactionService;
             _getTransactionsService = getTransactionsService;
-            _insertTransactionService = insertTransactionService;
+            _upsertTransactionService = upsertTransactionService;
         }
 
         [HttpGet]
@@ -55,7 +55,7 @@ namespace Ledger.WebApi.Controllers
             [FromBody] TransactionModel transaction,
             CancellationToken cancellationToken)
         {
-            return await _insertTransactionService.ExecuteAsync(transaction, cancellationToken);
+            return await _upsertTransactionService.ExecuteAsync(transaction, cancellationToken);
         }
     }
 }
