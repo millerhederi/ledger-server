@@ -26,8 +26,10 @@
   <ItemGroup>
     <None Remove="Scripts\Script_001_Bootstrap.sql" />
     <None Remove="Scripts\Script_002_CreateTransactionTable.sql" />
+    <None Remove="Scripts\Script_003_CreateAccountTable.sql" />
     <EmbeddedResource Include="Scripts\Script_001_Bootstrap.sql" />
     <EmbeddedResource Include="Scripts\Script_002_CreateTransactionTable.sql" />
+    <EmbeddedResource Include="Scripts\Script_003_CreateAccountTable.sql" />
   </ItemGroup>
 
 </Project>
