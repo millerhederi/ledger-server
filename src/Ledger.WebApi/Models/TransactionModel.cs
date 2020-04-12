@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Ledger.WebApi.Models
 {
@@ -7,6 +8,6 @@ namespace Ledger.WebApi.Models
         public Guid Id { get; set; }
         public DateTime PostedDate { get; set; }
         public string Description { get; set; }
-        public decimal Amount { get; set; }
+        public ICollection<PostingModel> Postings { get; } = new List<PostingModel>();
     }
 }

@@ -11,7 +11,6 @@ namespace Ledger.Tests.Services
         {
             var transactionModel = new TransactionModel
             {
-                Amount = 3.04m,
                 Description = "Tea",
                 PostedDate = new DateTime(2020, 4, 2),
             };
@@ -32,7 +31,6 @@ namespace Ledger.Tests.Services
         {
             var transactionModel = new TransactionModel
             {
-                Amount = 3.04m,
                 Description = "Tea",
                 PostedDate = new DateTime(2020, 4, 2),
             };
@@ -45,7 +43,6 @@ namespace Ledger.Tests.Services
             var updatedTransactionModel = new TransactionModel
             {
                 Id = transactionId,
-                Amount = 5.08m,
                 Description = "Coffee",
                 PostedDate = new DateTime(2020, 4, 11),
             };
@@ -60,7 +57,6 @@ namespace Ledger.Tests.Services
 
         private static void AssertTransaction(TransactionModel expected, TransactionModel actual)
         {
-            Assert.AreEqual(expected.Amount, actual.Amount);
             Assert.AreEqual(expected.Description, actual.Description);
             Assert.AreEqual(expected.PostedDate, actual.PostedDate);
         }

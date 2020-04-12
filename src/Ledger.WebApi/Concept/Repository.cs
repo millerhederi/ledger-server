@@ -20,6 +20,8 @@ namespace Ledger.WebApi.Concept
         Task UpsertAsync<T>(IEnumerable<T> entities, CancellationToken cancellationToken) where T : IEntity;
 
         Task UpsertAsync<T>(T entity, CancellationToken cancellationToken) where T : IEntity;
+
+        Task<T> QueryMultipleAsync<T>(CommandDefinition command, Func<SqlMapper.GridReader, Task<T>> fn);
     }
 
     public class Repository : IRepository
@@ -57,6 +59,16 @@ namespace Ledger.WebApi.Concept
             using (var cn = await CreateConnectionAsync(command.CancellationToken))
             {
                 return await cn.QuerySingleOrDefaultAsync<T>(command);
+            }
+        }
+
+        public async Task<T> QueryMultipleAsync<T>(CommandDefinition command, Func<SqlMapper.GridReader, Task<T>> fn)
+        {
+            using (var cn = await CreateConnectionAsync(command.CancellationToken))
+            {
+                var gridReader = await cn.QueryMultipleAsync(command);
+
+                return await fn(gridReader);
             }
         }
 

@@ -6,18 +6,34 @@ namespace Ledger.Tests.Services
 {
     public class GetTransactionServiceTests : TestBase
     {
+        private static readonly AccountModel CreditCardAccount = new AccountModel
+        {
+            Name = "liabilities:cc:visa",
+            Id = Guid.NewGuid(),
+        };
+
+        private static readonly AccountModel FoodAccount = new AccountModel
+        {
+            Name = "expenses:food",
+            Id = Guid.NewGuid(),
+        };
+
         private static readonly TransactionModel TransactionModel = new TransactionModel
         {
-            Amount = 3.04m,
             Description = "Tea",
             PostedDate = new DateTime(2020, 4, 2),
+            Postings =
+            {
+                new PostingModel { Amount = 3.73m, Account = FoodAccount },
+                new PostingModel { Amount = -3.73m, Account = CreditCardAccount },
+            }
         };
 
         [Test]
         public void ShouldGetTransaction()
         {
-            var builder = TestBuilder.Begin().AsUser();
-            var transactionId = builder.UpsertTransaction(TransactionModel).Result;
+            var builder = GetBuilderWithSetupTransaction();
+            var transactionId = builder.Result;
             var actualTransaction = builder.GetTransaction(transactionId).Result;
 
             TransactionModel.AssertEquals(actualTransaction);
@@ -36,12 +52,8 @@ namespace Ledger.Tests.Services
         [Test]
         public void ShouldHandleGettingValidTransactionWithInvalidUser()
         {
-            var builder = TestBuilder.Begin();
-
-            var transactionId = builder
-                .AsUser()
-                .UpsertTransaction(TransactionModel)
-                .Result;
+            var builder = GetBuilderWithSetupTransaction();
+            var transactionId = builder.Result;
 
             var transaction = builder
                 .AsUser()
@@ -49,6 +61,15 @@ namespace Ledger.Tests.Services
                 .Result;
 
             Assert.IsNull(transaction);
+        }
+
+        private static TestBuilder<Guid> GetBuilderWithSetupTransaction()
+        {
+            return TestBuilder.Begin()
+                .AsUser()
+                .UpsertAccount(CreditCardAccount)
+                .UpsertAccount(FoodAccount)
+                .UpsertTransaction(TransactionModel);
         }
     }
 }
