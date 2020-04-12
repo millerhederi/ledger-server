@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Ledger.WebApi.Models;
-using Ledger.WebApi.Services;
 using NUnit.Framework;
 
 namespace Ledger.Tests.Services
@@ -10,7 +7,7 @@ namespace Ledger.Tests.Services
     public class UpsertTransactionServiceTests : TestBase
     {
         [Test]
-        public async Task ShouldInsertTransaction()
+        public void ShouldInsertTransaction()
         {
             var transactionModel = new TransactionModel
             {
@@ -19,17 +16,19 @@ namespace Ledger.Tests.Services
                 PostedDate = new DateTime(2020, 4, 2),
             };
 
-            var upsertTransactionService = GetInstance<IUpsertTransactionService>();
-            var transactionId = await upsertTransactionService.ExecuteAsync(transactionModel, CancellationToken.None);
-
-            var getTransactionService = GetInstance<IGetTransactionService>();
-            var actualTransaction = await getTransactionService.ExecuteAsync(transactionId, CancellationToken.None);
+            var builder = TestBuilder.Begin();
+            var transactionId = builder
+                .UpsertTransaction(transactionModel)
+                .Result;
+            var actualTransaction = builder
+                .GetTransaction(transactionId)
+                .Result;
 
             AssertTransaction(transactionModel, actualTransaction);
         }
 
         [Test]
-        public async Task ShouldUpdateTransaction()
+        public void ShouldUpdateTransaction()
         {
             var transactionModel = new TransactionModel
             {
@@ -38,8 +37,10 @@ namespace Ledger.Tests.Services
                 PostedDate = new DateTime(2020, 4, 2),
             };
 
-            var upsertTransactionService = GetInstance<IUpsertTransactionService>();
-            var transactionId = await upsertTransactionService.ExecuteAsync(transactionModel, CancellationToken.None);
+            var builder = TestBuilder.Begin();
+            var transactionId = builder
+                .UpsertTransaction(transactionModel)
+                .Result;
 
             var updatedTransactionModel = new TransactionModel
             {
@@ -49,10 +50,10 @@ namespace Ledger.Tests.Services
                 PostedDate = new DateTime(2020, 4, 11),
             };
 
-            await upsertTransactionService.ExecuteAsync(updatedTransactionModel, CancellationToken.None);
-
-            var getTransactionService = GetInstance<IGetTransactionService>();
-            var actualTransaction = await getTransactionService.ExecuteAsync(transactionId, CancellationToken.None);
+            var actualTransaction = builder
+                .UpsertTransaction(updatedTransactionModel)
+                .GetTransaction(transactionId)
+                .Result;
 
             AssertTransaction(updatedTransactionModel, actualTransaction);
         }

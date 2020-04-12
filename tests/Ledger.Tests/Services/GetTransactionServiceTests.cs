@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Ledger.WebApi.Models;
-using Ledger.WebApi.Services;
 using NUnit.Framework;
 
 namespace Ledger.Tests.Services
@@ -10,11 +8,10 @@ namespace Ledger.Tests.Services
     public class GetTransactionServiceTests : TestBase
     {
         [Test]
-        public async Task ShouldGetTransactionAsync()
+        public void ShouldGetTransaction()
         {
-            var getTransactionService = GetInstance<IGetTransactionService>();
-            var transaction = await getTransactionService
-                .ExecuteAsync(new Guid("fdcb5bc6-e59f-4b1d-85f7-dc819f5b6c05"), CancellationToken.None);
+            var builder = TestBuilder.Begin()
+                .GetTransaction(new Guid("fdcb5bc6-e59f-4b1d-85f7-dc819f5b6c05"));
 
             var expected = new TransactionModel
             {
@@ -23,28 +20,26 @@ namespace Ledger.Tests.Services
                 PostedDate = new DateTime(2020, 3, 26)
             };
 
-            AssertTransaction(expected, transaction);
+            AssertTransaction(expected, builder.Result);
         }
 
         [Test]
-        public async Task ShouldHandleInvalidIdAsync()
+        public void ShouldHandleInvalidId()
         {
-            var getTransactionService = GetInstance<IGetTransactionService>();
-            var transaction = await getTransactionService.ExecuteAsync(Guid.NewGuid(), CancellationToken.None);
+            var builder = TestBuilder.Begin()
+                .GetTransaction(Guid.NewGuid());
 
-            Assert.IsNull(transaction);
+            Assert.IsNull(builder.Result);
         }
 
         [Test]
-        public async Task ShouldHandleGettingValidTransactionWithInvalidUserAsync()
+        public void ShouldHandleGettingValidTransactionWithInvalidUser()
         {
-            AsUserId(Guid.NewGuid());
+            var builder = TestBuilder.Begin()
+                .AsUser(Guid.NewGuid())
+                .GetTransaction(new Guid("fdcb5bc6-e59f-4b1d-85f7-dc819f5b6c05"));
 
-            var getTransactionService = GetInstance<IGetTransactionService>();
-            var transaction = await getTransactionService
-                .ExecuteAsync(new Guid("fdcb5bc6-e59f-4b1d-85f7-dc819f5b6c05"), CancellationToken.None);
-
-            Assert.IsNull(transaction);
+            Assert.IsNull(builder.Result);
         }
 
         private static void AssertTransaction(TransactionModel expected, TransactionModel actual)

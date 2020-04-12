@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Ledger.WebApi.Models;
-using Ledger.WebApi.Services;
 using NUnit.Framework;
 
 namespace Ledger.Tests.Services
@@ -11,10 +8,10 @@ namespace Ledger.Tests.Services
     public class ListAccountsServiceTests : TestBase
     {
         [Test]
-        public async Task ShouldGetAccountsAsync()
+        public void ShouldGetAccounts()
         {
-            var listAccountsService = GetInstance<IListAccountsService>();
-            var actual = await listAccountsService.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            var builder = TestBuilder.Begin()
+                .ListAccounts();
 
             var expected = new List<AccountModel>
             {
@@ -31,7 +28,7 @@ namespace Ledger.Tests.Services
                 new AccountModel { FullyQualifiedName = "liabilities:credit_card:visa", Name = "visa", ParentFullyQualifiedName = "liabilities:credit_card" },
             };
 
-            AssertAccounts(expected, actual);
+            AssertAccounts(expected, builder.Result);
         }
 
         private static void AssertAccounts(ICollection<AccountModel> expected, ICollection<AccountModel> actual)

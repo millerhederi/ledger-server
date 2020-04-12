@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Ledger.WebApi.Models;
-using Ledger.WebApi.Services;
 using NUnit.Framework;
 
 namespace Ledger.Tests.Services
@@ -12,10 +9,11 @@ namespace Ledger.Tests.Services
     public class ListTransactionsServiceTests : TestBase
     {
         [Test]
-        public async Task ShouldGetTransactionsAsync()
+        public void ShouldGetTransactions()
         {
-            var listTransactionsService = GetInstance<IListTransactionsService>();
-            var transactions = await listTransactionsService.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            var transactions = TestBuilder.Begin()
+                .ListTransactions()
+                .Result;
 
             var expected = new List<TransactionModel>
             {
@@ -27,10 +25,11 @@ namespace Ledger.Tests.Services
         }
 
         [Test]
-        public async Task ShouldHandleSkipAsync()
+        public void ShouldHandleSkip()
         {
-            var listTransactionsService = GetInstance<IListTransactionsService>();
-            var transactions = await listTransactionsService.ExecuteAsync(1, 100, CancellationToken.None).ConfigureAwait(false);
+            var transactions = TestBuilder.Begin()
+                .ListTransactions(1, 100)
+                .Result;
 
             var expected = new List<TransactionModel>
             {
@@ -41,10 +40,11 @@ namespace Ledger.Tests.Services
         }
 
         [Test]
-        public async Task ShouldHandleTakeAsync()
+        public void ShouldHandleTake()
         {
-            var listTransactionsService = GetInstance<IListTransactionsService>();
-            var transactions = await listTransactionsService.ExecuteAsync(0, 1, CancellationToken.None).ConfigureAwait(false);
+            var transactions = TestBuilder.Begin()
+                .ListTransactions(0, 1)
+                .Result;
 
             var expected = new List<TransactionModel>
             {
@@ -55,12 +55,12 @@ namespace Ledger.Tests.Services
         }
 
         [Test]
-        public async Task ShouldOnlyReturnTransactionsForCorrectUserAsync()
+        public void ShouldOnlyReturnTransactionsForCorrectUser()
         {
-            AsUserId(Guid.NewGuid());
-
-            var listTransactionsService = GetInstance<IListTransactionsService>();
-            var transactions = await listTransactionsService.ExecuteAsync(0, 1, CancellationToken.None).ConfigureAwait(false);
+            var transactions = TestBuilder.Begin()
+                .AsUser(Guid.NewGuid())
+                .ListTransactions()
+                .Result;
 
             AssertTransactions(new List<TransactionModel>(), transactions);
         }
