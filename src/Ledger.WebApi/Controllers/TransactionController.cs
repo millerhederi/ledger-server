@@ -15,16 +15,16 @@ namespace Ledger.WebApi.Controllers
     public class TransactionController : ControllerBase
     {
         private readonly IGetTransactionService _getTransactionService;
-        private readonly IGetTransactionsService _getTransactionsService;
+        private readonly IListTransactionsService _listTransactionsService;
         private readonly IUpsertTransactionService _upsertTransactionService;
 
         public TransactionController(
             IGetTransactionService getTransactionService,
-            IGetTransactionsService getTransactionsService,
+            IListTransactionsService listTransactionsService,
             IUpsertTransactionService upsertTransactionService)
         {
             _getTransactionService = getTransactionService;
-            _getTransactionsService = getTransactionsService;
+            _listTransactionsService = listTransactionsService;
             _upsertTransactionService = upsertTransactionService;
         }
 
@@ -45,9 +45,9 @@ namespace Ledger.WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<ICollection<TransactionModel>> GetTransactionsAsync(CancellationToken cancellationToken)
+        public async Task<ICollection<TransactionModel>> ListTransactionsAsync(CancellationToken cancellationToken)
         {
-            return await _getTransactionsService.ExecuteAsync(cancellationToken);
+            return await _listTransactionsService.ExecuteAsync(cancellationToken);
         }
 
         [HttpPost]

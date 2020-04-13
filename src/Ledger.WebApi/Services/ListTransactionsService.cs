@@ -9,21 +9,21 @@ using Ledger.WebApi.Models;
 
 namespace Ledger.WebApi.Services
 {
-    public interface IGetTransactionsService
+    public interface IListTransactionsService
     {
         Task<ICollection<TransactionModel>> ExecuteAsync(int skip, int take, CancellationToken cancellationToken);
 
         Task<ICollection<TransactionModel>> ExecuteAsync(CancellationToken cancellationToken);
     }
 
-    public class GetTransactionsService : IGetTransactionsService
+    public class ListTransactionsService : IListTransactionsService
     {
         private const int MaxTake = 50;
 
         private readonly IRequestContext _requestContext;
         private readonly IRepository _repository;
 
-        public GetTransactionsService(
+        public ListTransactionsService(
             IRequestContext requestContext,
             IRepository repository)
         {

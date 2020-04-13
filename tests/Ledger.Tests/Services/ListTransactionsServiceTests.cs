@@ -9,13 +9,13 @@ using NUnit.Framework;
 
 namespace Ledger.Tests.Services
 {
-    public class GetTransactionsServiceTests : TestBase
+    public class ListTransactionsServiceTests : TestBase
     {
         [Test]
         public async Task ShouldGetTransactionsAsync()
         {
-            var getTransactionsService = GetInstance<IGetTransactionsService>();
-            var transactions = await getTransactionsService.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            var listTransactionsService = GetInstance<IListTransactionsService>();
+            var transactions = await listTransactionsService.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
             var expected = new List<TransactionModel>
             {
@@ -29,8 +29,8 @@ namespace Ledger.Tests.Services
         [Test]
         public async Task ShouldHandleSkipAsync()
         {
-            var getTransactionsService = GetInstance<IGetTransactionsService>();
-            var transactions = await getTransactionsService.ExecuteAsync(1, 100, CancellationToken.None).ConfigureAwait(false);
+            var listTransactionsService = GetInstance<IListTransactionsService>();
+            var transactions = await listTransactionsService.ExecuteAsync(1, 100, CancellationToken.None).ConfigureAwait(false);
 
             var expected = new List<TransactionModel>
             {
@@ -43,8 +43,8 @@ namespace Ledger.Tests.Services
         [Test]
         public async Task ShouldHandleTakeAsync()
         {
-            var getTransactionsService = GetInstance<IGetTransactionsService>();
-            var transactions = await getTransactionsService.ExecuteAsync(0, 1, CancellationToken.None).ConfigureAwait(false);
+            var listTransactionsService = GetInstance<IListTransactionsService>();
+            var transactions = await listTransactionsService.ExecuteAsync(0, 1, CancellationToken.None).ConfigureAwait(false);
 
             var expected = new List<TransactionModel>
             {
@@ -59,8 +59,8 @@ namespace Ledger.Tests.Services
         {
             AsUserId(Guid.NewGuid());
 
-            var getTransactionsService = GetInstance<IGetTransactionsService>();
-            var transactions = await getTransactionsService.ExecuteAsync(0, 1, CancellationToken.None).ConfigureAwait(false);
+            var listTransactionsService = GetInstance<IListTransactionsService>();
+            var transactions = await listTransactionsService.ExecuteAsync(0, 1, CancellationToken.None).ConfigureAwait(false);
 
             AssertTransactions(new List<TransactionModel>(), transactions);
         }
