@@ -58,6 +58,18 @@ namespace Ledger.Tests
             return this;
         }
 
+        public TestBuilder<Guid> AsUser()
+        {
+            var builder = AddUser(new LoginModel {UserName = Guid.NewGuid().ToString(), Password = "Password123!"});
+            builder.AsUser(builder.Result);
+            return builder;
+        }
+
+        public TestBuilder<Guid> AddUser(LoginModel model)
+        {
+            return WithResult(GetInstance<IAddUserService>().ExecuteAsync(model, CancellationToken.None).Result);
+        }
+
         public TestBuilder<ICollection<AccountModel>> ListAccounts()
         {
             return WithResult(GetInstance<IListAccountsService>().ExecuteAsync(CancellationToken.None).Result);
