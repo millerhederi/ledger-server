@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -47,59 +46,14 @@ where a.[UserId] = @UserId";
                 return new List<AccountModel>();
             }
 
-            var fullyQualifiedNameLookupByAccountId = GetFullyQualifiedNameLookup(accounts);
-
             return accounts
                 .Select(x => new AccountModel
                 {
+                    Id = x.Id,
                     Name = x.Name,
-                    ParentFullyQualifiedName = x.ParentAccountId.HasValue
-                        ? fullyQualifiedNameLookupByAccountId[x.ParentAccountId.Value]
-                        : null,
-                    FullyQualifiedName = fullyQualifiedNameLookupByAccountId[x.Id],
                 })
-                .OrderBy(x => x.FullyQualifiedName)
+                .OrderBy(x => x.Name)
                 .ToList();
-        }
-
-        private IDictionary<Guid, string> GetFullyQualifiedNameLookup(ICollection<Account> accounts)
-        {
-            var result = new Dictionary<Guid, string>();
-
-            var rootAccounts = accounts
-                .Where(x => !x.ParentAccountId.HasValue)
-                .ToArray();
-
-            var accountsLookupByParentAccountId = accounts
-                .Where(x => x.ParentAccountId.HasValue)
-                .GroupBy(x => x.ParentAccountId)
-                .ToDictionary(x => x.Key, x => x.ToArray());
-
-            foreach (var account in rootAccounts)
-            {
-                result.Add(account.Id, account.Name);
-
-                PopulateLookupForAllChildrenAccounts(account.Id, account.Name);
-            }
-
-            return result;
-
-            void PopulateLookupForAllChildrenAccounts(Guid parentAccountId, string parentAccountFullyQualifiedName)
-            {
-                if (!accountsLookupByParentAccountId.TryGetValue(parentAccountId, out var childrenAccounts))
-                {
-                    return;
-                }
-
-                foreach (var account in childrenAccounts)
-                {
-                    var accountFullyQualifiedName = $"{parentAccountFullyQualifiedName}:{account.Name}";
-
-                    result.Add(account.Id, accountFullyQualifiedName);
-                    
-                    PopulateLookupForAllChildrenAccounts(account.Id, accountFullyQualifiedName);
-                }
-            }
         }
     }
 }

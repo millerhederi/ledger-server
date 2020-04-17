@@ -70,6 +70,11 @@ namespace Ledger.Tests
             return WithResult(GetInstance<IAddUserService>().ExecuteAsync(model, CancellationToken.None).Result);
         }
 
+        public TestBuilder<Guid> UpsertAccount(AccountModel model)
+        {
+            return WithResult(GetInstance<IUpsertAccountService>().ExecuteAsync(model, CancellationToken.None).Result);
+        }
+
         public TestBuilder<ICollection<AccountModel>> ListAccounts()
         {
             return WithResult(GetInstance<IListAccountsService>().ExecuteAsync(CancellationToken.None).Result);
