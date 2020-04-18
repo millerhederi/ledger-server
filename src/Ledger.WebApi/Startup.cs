@@ -30,6 +30,7 @@ namespace Ledger.WebApi
             services.AddTransient<IListAccountsService, ListAccountsService>();
             services.AddTransient<IAddUserService, AddUserService>();
             services.AddTransient<IUpsertAccountService, UpsertAccountService>();
+            services.AddTransient<IListPostingsService, ListPostingsService>();
             services.AddSingleton<IRepository, Repository>();
             services.AddScoped<IRequestContext, RequestContext>();
         }

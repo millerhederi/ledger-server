@@ -80,6 +80,11 @@ namespace Ledger.Tests
             return WithResult(GetInstance<IListAccountsService>().ExecuteAsync(CancellationToken.None).Result);
         }
 
+        public TestBuilder<ICollection<PostingModel>> ListPostings(Guid accountId)
+        {
+            return WithResult(GetInstance<IListPostingsService>().ExecuteAsync(accountId, CancellationToken.None).Result);
+        }
+
         public TestBuilder<Guid> UpsertTransaction(TransactionModel model)
         {
             return WithResult(GetInstance<IUpsertTransactionService>().ExecuteAsync(model, CancellationToken.None).Result);
