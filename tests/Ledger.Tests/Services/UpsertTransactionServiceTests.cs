@@ -16,7 +16,7 @@ namespace Ledger.Tests.Services
                 PostedDate = new DateTime(2020, 4, 2),
             };
 
-            var builder = TestBuilder.Begin();
+            var builder = TestBuilder.Begin().AsUser();
             var transactionId = builder
                 .UpsertTransaction(transactionModel)
                 .Result;
@@ -37,7 +37,7 @@ namespace Ledger.Tests.Services
                 PostedDate = new DateTime(2020, 4, 2),
             };
 
-            var builder = TestBuilder.Begin();
+            var builder = TestBuilder.Begin().AsUser();
             var transactionId = builder
                 .UpsertTransaction(transactionModel)
                 .Result;

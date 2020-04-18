@@ -10,8 +10,3 @@ create table [dbo].[User]
     ,constraint [PK_User] primary key clustered ([Id])
 );
 go
-
-declare @UtcNow [datetime2](7) = GetUtcDate();
-
-insert into [dbo].[User] values
-    ('da1ac815-ec39-4ca8-a8f3-7f9856384e32', 'user', @UtcNow, @UtcNow);

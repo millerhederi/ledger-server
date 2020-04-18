@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Ledger.WebApi.Models;
 using NUnit.Framework;
@@ -8,78 +7,63 @@ namespace Ledger.Tests.Services
 {
     public class ListTransactionsServiceTests : TestBase
     {
+        private static readonly TransactionModel[] TransactionModels =
+        {
+            new TransactionModel {Description = "Groceries", Amount = 24.87m, PostedDate = new DateTime(2020, 3, 26)},
+            new TransactionModel {Description = "Netflix", Amount = 13.00m, PostedDate = new DateTime(2020, 3, 28)},
+        };
+
         [Test]
         public void ShouldGetTransactions()
         {
-            var transactions = TestBuilder.Begin()
-                .ListTransactions()
-                .Result;
+            var builder = GetBuilderWithSetupTransactions();
 
-            var expected = new List<TransactionModel>
-            {
-                new TransactionModel {Description = "Groceries", Amount = 24.87m, PostedDate = new DateTime(2020, 3, 26)},
-                new TransactionModel {Description = "Netflix", Amount = 13.00m, PostedDate = new DateTime(2020, 3, 28)},
-            };
+            var actualTransactions = builder.ListTransactions().Result;
 
-            AssertTransactions(expected, transactions);
+            TransactionModels.AssertEquals(actualTransactions);
         }
 
         [Test]
         public void ShouldHandleSkip()
         {
-            var transactions = TestBuilder.Begin()
+            var transactions = GetBuilderWithSetupTransactions()
                 .ListTransactions(1, 100)
                 .Result;
 
-            var expected = new List<TransactionModel>
-            {
-                new TransactionModel {Description = "Netflix", Amount = 13.00m, PostedDate = new DateTime(2020, 3, 28)},
-            };
-
-            AssertTransactions(expected, transactions);
+            TransactionModels.Skip(1).AssertEquals(transactions);
         }
 
         [Test]
         public void ShouldHandleTake()
         {
-            var transactions = TestBuilder.Begin()
+            var transactions = GetBuilderWithSetupTransactions()
                 .ListTransactions(0, 1)
                 .Result;
 
-            var expected = new List<TransactionModel>
-            {
-                new TransactionModel {Description = "Groceries", Amount = 24.87m, PostedDate = new DateTime(2020, 3, 26)},
-            };
-
-            AssertTransactions(expected, transactions);
+            TransactionModels.Take(1).AssertEquals(transactions);
         }
 
         [Test]
         public void ShouldOnlyReturnTransactionsForCorrectUser()
         {
-            var transactions = TestBuilder.Begin()
-                .AsUser(Guid.NewGuid())
+            var transactions = GetBuilderWithSetupTransactions()
+                .AsUser()
                 .ListTransactions()
                 .Result;
 
-            AssertTransactions(new List<TransactionModel>(), transactions);
+            Enumerable.Empty<TransactionModel>().AssertEquals(transactions);
         }
 
-        private static void AssertTransactions(ICollection<TransactionModel> expected, ICollection<TransactionModel> actual)
+        private static TestBuilder GetBuilderWithSetupTransactions()
         {
-            Assert.AreEqual(expected.Count, actual.Count, "Expecting the count of the two collections to equal.");
+            var builder = TestBuilder.Begin().AsUser();
 
-            for (var i = 0; i < expected.Count; i++)
+            foreach (var transaction in TransactionModels)
             {
-                AssertTransaction(expected.ElementAt(i), actual.ElementAt(i));
+                builder.UpsertTransaction(transaction);
             }
-        }
 
-        private static void AssertTransaction(TransactionModel expected, TransactionModel actual)
-        {
-            Assert.AreEqual(expected.Amount, actual.Amount);
-            Assert.AreEqual(expected.Description, actual.Description);
-            Assert.AreEqual(expected.PostedDate, actual.PostedDate);
+            return builder;
         }
     }
 }

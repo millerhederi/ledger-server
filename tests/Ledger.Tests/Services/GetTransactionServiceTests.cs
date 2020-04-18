@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Ledger.WebApi.Models;
 using NUnit.Framework;
 
@@ -7,26 +6,28 @@ namespace Ledger.Tests.Services
 {
     public class GetTransactionServiceTests : TestBase
     {
+        private static readonly TransactionModel TransactionModel = new TransactionModel
+        {
+            Amount = 3.04m,
+            Description = "Tea",
+            PostedDate = new DateTime(2020, 4, 2),
+        };
+
         [Test]
         public void ShouldGetTransaction()
         {
-            var builder = TestBuilder.Begin()
-                .GetTransaction(new Guid("fdcb5bc6-e59f-4b1d-85f7-dc819f5b6c05"));
+            var builder = TestBuilder.Begin().AsUser();
+            var transactionId = builder.UpsertTransaction(TransactionModel).Result;
+            var actualTransaction = builder.GetTransaction(transactionId).Result;
 
-            var expected = new TransactionModel
-            {
-                Description = "Groceries", 
-                Amount = 24.87m, 
-                PostedDate = new DateTime(2020, 3, 26)
-            };
-
-            AssertTransaction(expected, builder.Result);
+            TransactionModel.AssertEquals(actualTransaction);
         }
 
         [Test]
         public void ShouldHandleInvalidId()
         {
             var builder = TestBuilder.Begin()
+                .AsUser()
                 .GetTransaction(Guid.NewGuid());
 
             Assert.IsNull(builder.Result);
@@ -35,18 +36,19 @@ namespace Ledger.Tests.Services
         [Test]
         public void ShouldHandleGettingValidTransactionWithInvalidUser()
         {
-            var builder = TestBuilder.Begin()
-                .AsUser(Guid.NewGuid())
-                .GetTransaction(new Guid("fdcb5bc6-e59f-4b1d-85f7-dc819f5b6c05"));
+            var builder = TestBuilder.Begin();
 
-            Assert.IsNull(builder.Result);
-        }
+            var transactionId = builder
+                .AsUser()
+                .UpsertTransaction(TransactionModel)
+                .Result;
 
-        private static void AssertTransaction(TransactionModel expected, TransactionModel actual)
-        {
-            Assert.AreEqual(expected.Amount, actual.Amount);
-            Assert.AreEqual(expected.Description, actual.Description);
-            Assert.AreEqual(expected.PostedDate, actual.PostedDate);
+            var transaction = builder
+                .AsUser()
+                .GetTransaction(transactionId)
+                .Result;
+
+            Assert.IsNull(transaction);
         }
     }
 }
