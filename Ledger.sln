@@ -9,7 +9,9 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ledger.DatabaseInstaller", "src\Ledger.DatabaseInstaller\Ledger.DatabaseInstaller.csproj", "{2D193A06-B4F9-454C-8E9B-FA6998DF1AE9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ledger.Tests", "tests\Ledger.Tests\Ledger.Tests.csproj", "{40AD09CF-422D-41CF-A5DC-5AF3B5ADC0EA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ledger.Tests", "tests\Ledger.Tests\Ledger.Tests.csproj", "{40AD09CF-422D-41CF-A5DC-5AF3B5ADC0EA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ledger.Cli", "src\Ledger.Cli\Ledger.Cli.csproj", "{5E17D476-3463-4F08-85A3-7E76A83FB510}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{40AD09CF-422D-41CF-A5DC-5AF3B5ADC0EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{40AD09CF-422D-41CF-A5DC-5AF3B5ADC0EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{40AD09CF-422D-41CF-A5DC-5AF3B5ADC0EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E17D476-3463-4F08-85A3-7E76A83FB510}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E17D476-3463-4F08-85A3-7E76A83FB510}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E17D476-3463-4F08-85A3-7E76A83FB510}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E17D476-3463-4F08-85A3-7E76A83FB510}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
