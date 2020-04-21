@@ -7,7 +7,7 @@ Ledger is in early development stages, but the goal is to become a web based dou
 To run Ledger locally, simply execute:
 
 ```
-docker-compose up
+.\Start-LedgerServer.ps1
 ```
 
 # Developing
