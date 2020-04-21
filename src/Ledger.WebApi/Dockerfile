@@ -12,7 +12,7 @@ RUN dotnet restore src/Ledger.WebApi/Ledger.WebApi.csproj
 # copy everything else and build app
 COPY src/Ledger.WebApi/ src/Ledger.WebApi/
 WORKDIR /source/src/Ledger.WebApi
-RUN dotnet build -c release -o /app/build --no-restore
+RUN dotnet build -c release --no-restore
 
 FROM build AS publish
 RUN dotnet publish -c release --no-build -o /app/publish

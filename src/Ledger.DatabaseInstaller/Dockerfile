@@ -11,7 +11,7 @@ RUN dotnet restore src/Ledger.DatabaseInstaller/Ledger.DatabaseInstaller.csproj
 # copy everything else and build app
 COPY src/Ledger.DatabaseInstaller/ src/Ledger.DatabaseInstaller/
 WORKDIR /source/src/Ledger.DatabaseInstaller
-RUN dotnet build -c release -o /app/build --no-restore
+RUN dotnet build -c release --no-restore
 
 FROM build AS publish
 RUN dotnet publish -c release --no-build -o /app/publish
