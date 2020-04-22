@@ -1,7 +1,9 @@
+using System.Reflection;
 using System.Text;
 using Ledger.WebApi.Concept;
 using Ledger.WebApi.Filters;
 using Ledger.WebApi.Services;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -66,6 +68,8 @@ namespace Ledger.WebApi
             {
                 options.Filters.Add<RequestContextFilter>();
             });
+
+            services.AddMediatR(Assembly.GetExecutingAssembly());
 
             ConfigureIoc(services);
         }
