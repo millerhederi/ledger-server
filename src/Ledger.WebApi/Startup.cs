@@ -55,6 +55,13 @@ namespace Ledger.WebApi
                     };
                 });
 
+            services.AddCors(options => { options.AddDefaultPolicy(builder =>
+                builder
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader());
+            });
+
             services.AddControllers(options =>
             {
                 options.Filters.Add<RequestContextFilter>();
@@ -72,6 +79,8 @@ namespace Ledger.WebApi
             }
 
             app.UseRouting();
+
+            app.UseCors();
 
             app.UseAuthentication();
             app.UseAuthorization();
