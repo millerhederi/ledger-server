@@ -80,7 +80,7 @@ namespace Ledger.Tests
             return WithResult(GetInstance<IListAccountsService>().ExecuteAsync(CancellationToken.None).Result);
         }
 
-        public TestBuilder<ICollection<PostingModel>> ListPostings(Guid accountId)
+        public TestBuilder<ICollection<AccountPostingModel>> ListPostings(Guid accountId)
         {
             return WithResult(GetInstance<IListPostingsService>().ExecuteAsync(accountId, CancellationToken.None).Result);
         }
@@ -103,6 +103,11 @@ namespace Ledger.Tests
         public TestBuilder<ICollection<TransactionModel>> ListTransactions()
         {
             return WithResult(GetInstance<IListTransactionsService>().ExecuteAsync(CancellationToken.None).Result);
+        }
+
+        public TestBuilder<ICollection<MonthlyPostingTotalModel>> GetPostingTotalsByMonth(Guid accountId)
+        {
+            return WithResult(GetInstance<IGetPostingTotalsByMonthService>().ExecuteAsync(accountId, CancellationToken.None).Result);
         }
 
         public T GetInstance<T>() => _serviceProvider.GetRequiredService<T>();

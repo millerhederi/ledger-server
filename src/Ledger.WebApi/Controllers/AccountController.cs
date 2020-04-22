@@ -14,11 +14,16 @@ namespace Ledger.WebApi.Controllers
     {
         private readonly IListAccountsService _listAccountsService;
         private readonly IListPostingsService _listPostingsService;
+        private readonly IGetPostingTotalsByMonthService _getPostingTotalsByMonthService;
 
-        public AccountController(IListAccountsService listAccountsService, IListPostingsService listPostingsService)
+        public AccountController(
+            IListAccountsService listAccountsService, 
+            IListPostingsService listPostingsService,
+            IGetPostingTotalsByMonthService getPostingTotalsByMonthService)
         {
             _listAccountsService = listAccountsService;
             _listPostingsService = listPostingsService;
+            _getPostingTotalsByMonthService = getPostingTotalsByMonthService;
         }
 
         [HttpGet]
@@ -29,11 +34,20 @@ namespace Ledger.WebApi.Controllers
 
         [HttpGet]
         [Route("{accountId}/posting")]
-        public async Task<ICollection<PostingModel>> ListAccountPostings(
+        public async Task<ICollection<AccountPostingModel>> ListAccountPostings(
             [FromRoute] Guid accountId,
             CancellationToken cancellationToken)
         {
             return await _listPostingsService.ExecuteAsync(accountId, cancellationToken);
+        }
+
+        [HttpGet]
+        [Route("{accountId}/posting/monthly")]
+        public async Task<ICollection<MonthlyPostingTotalModel>> GetMonthlyAggregates(
+            [FromRoute] Guid accountId,
+            CancellationToken cancellationToken)
+        {
+            return await _getPostingTotalsByMonthService.ExecuteAsync(accountId, cancellationToken);
         }
     }
 }

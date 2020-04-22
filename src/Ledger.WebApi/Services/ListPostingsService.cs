@@ -12,7 +12,7 @@ namespace Ledger.WebApi.Services
 {
     public interface IListPostingsService
     {
-        Task<ICollection<PostingModel>> ExecuteAsync(Guid accountId, CancellationToken cancellationToken);
+        Task<ICollection<AccountPostingModel>> ExecuteAsync(Guid accountId, CancellationToken cancellationToken);
     }
 
     public class ListPostingsService : IListPostingsService
@@ -26,20 +26,21 @@ namespace Ledger.WebApi.Services
             _requestContext = requestContext;
         }
 
-        public async Task<ICollection<PostingModel>> ExecuteAsync(Guid accountId, CancellationToken cancellationToken)
+        public async Task<ICollection<AccountPostingModel>> ExecuteAsync(Guid accountId, CancellationToken cancellationToken)
         {
             const string sql = @"
 select
 	 t.[PostedDate]
 	,t.[Description]
 	,p.[Amount]
-	,a.[Name] as [AccountName]
-    ,a.[Id] as [AccountId]
+	,p.[Id] as [PostingId]
+    ,t.[Id] as [TransactionId]
 from [dbo].[Posting] p
 	inner join [dbo].[Account] a on p.[AccountId] = a.[Id]
 	inner join [dbo].[Transaction] t on p.[TransactionId] = t.[Id] 
 where t.[UserId] = @UserId
-    and a.Id = @AccountId";
+    and a.Id = @AccountId
+order by t.[PostedDate] desc, t.[Id], p.[Id]";
 
             var parameters = new DynamicParameters();
             parameters.Add("AccountId", accountId);
@@ -49,10 +50,13 @@ where t.[UserId] = @UserId
 
             var postings = await _repository.QueryAsync<PostingDto>(command);
 
-            return postings.Select(x => new PostingModel
+            return postings.Select(x => new AccountPostingModel
             {
                 Amount = x.Amount,
-                Account = new AccountModel {Name = x.AccountName, Id = x.AccountId}
+                Id = x.PostingId,
+                PostedDate = x.PostedDate,
+                Description = x.Description,
+                TransactionId = x.TransactionId,
             }).ToList();
         }
 
@@ -60,9 +64,11 @@ where t.[UserId] = @UserId
         [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
         private class PostingDto
         {
-            public Guid AccountId { get; set; }
-            public string AccountName { get; set; }
             public decimal Amount { get; set; }
+            public DateTime PostedDate { get; set; }
+            public string Description { get; set; }
+            public Guid PostingId { get; set; }
+            public Guid TransactionId { get; set; }
         }
     }
 }

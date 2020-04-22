@@ -54,6 +54,23 @@ namespace Ledger.Tests
         }
         #endregion PostingModel
 
+        #region AccountPostingModel
+
+        public static void AssertEquals(this IEnumerable<AccountPostingModel> expected,  IEnumerable<AccountPostingModel> actual)
+        {
+            AssertCollectionsEqual(expected, actual, (e, a) => e.AssertEquals(a));
+        }
+
+        public static void AssertEquals(this AccountPostingModel expected, AccountPostingModel actual)
+        {
+            Assert.AreEqual(expected.Amount, actual.Amount);
+            Assert.AreEqual(expected.Description, actual.Description);
+            Assert.AreEqual(expected.PostedDate, actual.PostedDate);
+            Assert.AreEqual(expected.TransactionId, actual.TransactionId);
+        }
+
+        #endregion
+
         private static void AssertCollectionsEqual<T>(IEnumerable<T> expected, IEnumerable<T> actual, Action<T, T> assertionFn)
         {
             var expectedList = expected.ToList();

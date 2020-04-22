@@ -23,6 +23,7 @@ namespace Ledger.Tests.Services
         {
             new TransactionModel
             {
+                Id = Guid.NewGuid(),
                 Description = "Groceries",
                 PostedDate = new DateTime(2020, 3, 26),
                 Postings =
@@ -33,6 +34,7 @@ namespace Ledger.Tests.Services
             },
             new TransactionModel
             {
+                Id = Guid.NewGuid(),
                 Description = "Pizza",
                 PostedDate = new DateTime(2020, 3, 28),
                 Postings =
@@ -50,9 +52,23 @@ namespace Ledger.Tests.Services
                 .ListPostings(FoodAccount.Id)
                 .Result;
 
-            var expectedPostings = TransactionModels
-                .SelectMany(x => x.Postings)
-                .Where(x => x.Account.Id == FoodAccount.Id);
+            var expectedPostings = new []
+            {
+                new AccountPostingModel
+                {
+                    Amount = 14m,
+                    PostedDate = TransactionModels[1].PostedDate,
+                    Description = TransactionModels[1].Description,
+                    TransactionId = TransactionModels[1].Id,
+                },
+                new AccountPostingModel
+                {
+                    Amount = 87.34m,
+                    PostedDate = TransactionModels[0].PostedDate,
+                    Description = TransactionModels[0].Description,
+                    TransactionId = TransactionModels[0].Id,
+                },
+            };
 
             expectedPostings.AssertEquals(postings);
         }
