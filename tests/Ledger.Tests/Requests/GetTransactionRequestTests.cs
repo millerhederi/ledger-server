@@ -2,9 +2,9 @@
 using Ledger.WebApi.Models;
 using NUnit.Framework;
 
-namespace Ledger.Tests.Services
+namespace Ledger.Tests.Requests
 {
-    public class GetTransactionServiceTests : TestBase
+    public class GetTransactionRequestTests : TestBase
     {
         private static readonly AccountModel CreditCardAccount = new AccountModel
         {
@@ -24,8 +24,8 @@ namespace Ledger.Tests.Services
             PostedDate = new DateTime(2020, 4, 2),
             Postings =
             {
-                new PostingModel { Amount = 3.73m, Account = FoodAccount },
-                new PostingModel { Amount = -3.73m, Account = CreditCardAccount },
+                new TransactionModel.Posting { Amount = 3.73m, Account = new TransactionModel.Account {Id = FoodAccount.Id, Name = FoodAccount.Name}},
+                new TransactionModel.Posting { Amount = -3.73m, Account = new TransactionModel.Account {Id = CreditCardAccount.Id, Name = CreditCardAccount.Name}},
             }
         };
 

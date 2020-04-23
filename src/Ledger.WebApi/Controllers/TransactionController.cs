@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Ledger.WebApi.Models;
-using Ledger.WebApi.Services;
+using Ledger.WebApi.Requests;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,60 +13,53 @@ namespace Ledger.WebApi.Controllers
     [Route("api/[controller]")]
     public class TransactionController : ControllerBase
     {
-        private readonly IGetTransactionService _getTransactionService;
-        private readonly IListTransactionsService _listTransactionsService;
-        private readonly IUpsertTransactionService _upsertTransactionService;
+        private readonly IMediator _mediator;
 
-        public TransactionController(
-            IGetTransactionService getTransactionService,
-            IListTransactionsService listTransactionsService,
-            IUpsertTransactionService upsertTransactionService)
+        public TransactionController(IMediator mediator)
         {
-            _getTransactionService = getTransactionService;
-            _listTransactionsService = listTransactionsService;
-            _upsertTransactionService = upsertTransactionService;
+            _mediator = mediator;
         }
 
         [HttpGet]
         [Route("{id}")]
-        public async Task<ActionResult<TransactionModel>> GetTransactionAsync(
+        public async Task<ActionResult<GetTransactionResponse>> GetTransactionAsync(
             [FromRoute] Guid id,
             CancellationToken cancellationToken)
         {
-            var transaction = await _getTransactionService.ExecuteAsync(id, cancellationToken);
+            var response = await _mediator.Send(new GetTransactionRequest(id), cancellationToken);
 
-            if (transaction == null)
+            if (response.Transaction == null)
             {
                 return NotFound();
             }
 
-            return transaction;
+            return response;
         }
 
         [HttpGet]
-        public async Task<ICollection<TransactionModel>> ListTransactionsAsync(CancellationToken cancellationToken)
+        public async Task<ListTransactionsResponse> ListTransactionsAsync(CancellationToken cancellationToken)
         {
-            return await _listTransactionsService.ExecuteAsync(cancellationToken);
+            return await _mediator.Send(new ListTransactionsRequest(), cancellationToken);
         }
 
         [HttpPost]
-        public async Task<Guid> PostTransactionAsync(
-            [FromBody] TransactionModel transaction,
+        public async Task<UpsertTransactionResponse> PostTransactionAsync(
+            [FromBody] UpsertTransactionRequest request,
             CancellationToken cancellationToken)
         {
-            return await _upsertTransactionService.ExecuteAsync(transaction, cancellationToken);
+            return await _mediator.Send(request, cancellationToken);
         }
 
         [HttpPut]
         [Route("{id}")]
-        public async Task<Guid> UpdateTransactionAsync(
+        public async Task<UpsertTransactionResponse> UpdateTransactionAsync(
             [FromRoute] Guid id,
-            [FromBody] TransactionModel transaction,
+            [FromBody] UpsertTransactionRequest request,
             CancellationToken cancellationToken)
         {
-            transaction.Id = id;
+            request.Transaction.Id = id;
 
-            return await _upsertTransactionService.ExecuteAsync(transaction, cancellationToken);
+            return await _mediator.Send(request, cancellationToken);
         }
     }
 }

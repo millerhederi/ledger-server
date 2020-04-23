@@ -3,7 +3,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Ledger.WebApi.Concept;
-using Ledger.WebApi.Services;
+using Ledger.WebApi.RequestHandlers;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Ledger.WebApi.Filters
@@ -35,16 +35,16 @@ namespace Ledger.WebApi.Filters
 
         private static void HandleAuthenticatedUser(IRequestContext requestContext, ClaimsPrincipal user)
         {
-            var userIdClaim = user.Claims.SingleOrDefault(x => x.Type == AuthenticateUserService.UserIdClaimName);
+            var userIdClaim = user.Claims.SingleOrDefault(x => x.Type == BuildUserJwtTokenRequestHandler.UserIdClaimName);
 
             if (userIdClaim == null)
             {
-                throw new InvalidOperationException($"Expecting a claim type '{AuthenticateUserService.UserIdClaimName}' for an authenticated user.");
+                throw new InvalidOperationException($"Expecting a claim type '{BuildUserJwtTokenRequestHandler.UserIdClaimName}' for an authenticated user.");
             }
 
             if (!Guid.TryParse(userIdClaim.Value, out var userId))
             {
-                throw new ArgumentOutOfRangeException($"The claim '{AuthenticateUserService.UserIdClaimName}' was not a valid UUID: '{userIdClaim.Value}'.");
+                throw new ArgumentOutOfRangeException($"The claim '{BuildUserJwtTokenRequestHandler.UserIdClaimName}' was not a valid UUID: '{userIdClaim.Value}'.");
             }
 
             requestContext.IsAuthenticated = true;

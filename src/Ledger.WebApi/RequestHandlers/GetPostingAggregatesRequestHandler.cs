@@ -1,33 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using Ledger.WebApi.Concept;
-using Ledger.WebApi.Models;
+using Ledger.WebApi.Requests;
+using MediatR;
 
-namespace Ledger.WebApi.Services
+namespace Ledger.WebApi.RequestHandlers
 {
-    public interface IGetPostingTotalsByMonthService
-    {
-        Task<ICollection<MonthlyPostingTotalModel>> ExecuteAsync(Guid accountId,  CancellationToken cancellationToken);
-    }
-
-    public class GetPostingTotalsByMonthService : IGetPostingTotalsByMonthService
+    public class GetPostingAggregatesRequestHandler : IRequestHandler<GetPostingAggregatesRequest, GetPostingAggregatesResponse>
     {
         private readonly IRepository _repository;
         private readonly IRequestContext _requestContext;
 
-        public GetPostingTotalsByMonthService(IRepository repository, IRequestContext requestContext)
+        public GetPostingAggregatesRequestHandler(IRepository repository, IRequestContext requestContext)
         {
             _repository = repository;
             _requestContext = requestContext;
         }
 
-        public async Task<ICollection<MonthlyPostingTotalModel>> ExecuteAsync(
-            Guid accountId,
-            CancellationToken cancellationToken)
+        public async Task<GetPostingAggregatesResponse> Handle(GetPostingAggregatesRequest request, CancellationToken cancellationToken)
         {
             const string sql = @"
 select
@@ -44,20 +38,26 @@ order by [Year], [Month]";
 
             var parameters = new DynamicParameters();
             parameters.Add("UserId", _requestContext.UserId);
-            parameters.Add("AccountId", accountId);
+            parameters.Add("AccountId", request.AccountId);
 
             var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
 
             var dtos = await _repository.QueryAsync<Dto>(command);
+            var aggregates = dtos.Select(x => new GetPostingAggregatesResponse.Aggregate
+                {
+                    Amount = x.Amount,
+                    Count = x.Count,
+                    Date = new DateTime(x.Year, x.Month, 1),
+                }).ToList();
 
-            return dtos.Select(x => new MonthlyPostingTotalModel
+            return new GetPostingAggregatesResponse
             {
-                Amount = x.Amount,
-                Count = x.Count,
-                Date = new DateTime(x.Year, x.Month, 1),
-            }).ToList();
+                Aggregates = aggregates,
+            };
         }
 
+        [SuppressMessage("ReSharper", "ClassNeverInstantiated.Local")]
+        [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
         private class Dto
         {
             public decimal Amount { get; set; }

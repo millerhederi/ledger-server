@@ -1,9 +1,10 @@
 ﻿using Ledger.WebApi.Models;
+using Ledger.WebApi.Requests;
 using NUnit.Framework;
 
-namespace Ledger.Tests.Services
+namespace Ledger.Tests.Requests
 {
-    public class UpsertAccountServiceTests : TestBase
+    public class UpsertAccountRequestTests : TestBase
     {
         [Test]
         public void ShouldUpsertAccount()
@@ -13,9 +14,9 @@ namespace Ledger.Tests.Services
             var builder = TestBuilder.Begin()
                 .AsUser()
                 .UpsertAccount(accountModel)
-                .ListAccounts();
+                .ExecuteRequest(new ListAccountsRequest());
 
-            new[] {accountModel}.AssertEquals(builder.Result);
+            new[] { accountModel }.AssertEquals(builder.Result.Items);
         }
     }
 }

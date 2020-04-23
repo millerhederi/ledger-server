@@ -4,27 +4,23 @@ using System.Threading.Tasks;
 using Dapper;
 using Ledger.WebApi.Concept;
 using Ledger.WebApi.DataAccess;
-using Ledger.WebApi.Models;
+using Ledger.WebApi.Requests;
+using MediatR;
 
-namespace Ledger.WebApi.Services
+namespace Ledger.WebApi.RequestHandlers
 {
-    public interface IAddUserService
-    {
-        Task<Guid> ExecuteAsync(LoginModel model, CancellationToken cancellationToken);
-    }
-
-    public class AddUserService : IAddUserService
+    public class AddUserRequestHandler : IRequestHandler<AddUserRequest, AddUserResponse>
     {
         private readonly IRepository _repository;
 
-        public AddUserService(IRepository repository)
+        public AddUserRequestHandler(IRepository repository)
         {
             _repository = repository;
         }
 
-        public async Task<Guid> ExecuteAsync(LoginModel model, CancellationToken cancellationToken)
+        public async Task<AddUserResponse> Handle(AddUserRequest request, CancellationToken cancellationToken)
         {
-            if (await GetIsUserNameAlreadyTakenAsync(model.UserName, cancellationToken))
+            if (await GetIsUserNameAlreadyTakenAsync(request.UserName, cancellationToken))
             {
                 throw new Exception("The given UserName is already taken.");
             }
@@ -32,14 +28,14 @@ namespace Ledger.WebApi.Services
             var user = new User
             {
                 Id = Guid.NewGuid(),
-                UserName = model.UserName,
+                UserName = request.UserName,
                 CreatedTimestamp = DateTime.UtcNow,
                 UpdatedTimestamp = DateTime.UtcNow,
             };
 
             await _repository.UpsertAsync(user, cancellationToken);
 
-            return user.Id;
+            return new AddUserResponse { Id = user.Id };
         }
 
         private async Task<bool> GetIsUserNameAlreadyTakenAsync(string userName, CancellationToken cancellationToken)

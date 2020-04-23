@@ -3,12 +3,12 @@ using System.Threading.Tasks;
 using Dapper;
 using Ledger.WebApi.Concept;
 using Ledger.WebApi.DataAccess;
-using Ledger.WebApi.Models;
+using Ledger.WebApi.Requests;
 using NUnit.Framework;
 
-namespace Ledger.Tests.Services
+namespace Ledger.Tests.Requests
 {
-    public class AddUserServiceTests : TestBase
+    public class AddUserRequestTests : TestBase
     {
         [Test]
         public async Task ShouldAddUserAsync()
@@ -16,7 +16,7 @@ namespace Ledger.Tests.Services
             var userName = Guid.NewGuid().ToString();
 
             var builder = TestBuilder.Begin()
-                .AddUser(new LoginModel {UserName = userName, Password = "Password123!"});
+                .ExecuteRequest(new AddUserRequest {UserName = userName, Password = "Password123!"});
 
             var repository = builder.GetInstance<IRepository>();
 
@@ -33,15 +33,15 @@ namespace Ledger.Tests.Services
         [Test]
         public void ShouldThrowWhenAddingUserWithDuplicateUserName()
         {
-            var model = new LoginModel
+            var request = new AddUserRequest
             {
                 UserName = Guid.NewGuid().ToString(),
                 Password = "Password123!",
             };
 
-            var builder = TestBuilder.Begin().AddUser(model);
+            var builder = TestBuilder.Begin().ExecuteRequest(request);
 
-            Assert.Throws<AggregateException>(() => builder.AddUser(model));
+            Assert.Throws<AggregateException>(() => builder.ExecuteRequest(request));
         }
     }
 }

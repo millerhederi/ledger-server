@@ -7,20 +7,17 @@ using Dapper;
 using Ledger.WebApi.Concept;
 using Ledger.WebApi.DataAccess;
 using Ledger.WebApi.Models;
+using Ledger.WebApi.Requests;
+using MediatR;
 
-namespace Ledger.WebApi.Services
+namespace Ledger.WebApi.RequestHandlers
 {
-    public interface IGetTransactionService
-    {
-        Task<TransactionModel> ExecuteAsync(Guid id, CancellationToken cancellationToken);
-    }
-
-    public class GetTransactionService : IGetTransactionService
+    public class GetTransactionRequestHandler : IRequestHandler<GetTransactionRequest, GetTransactionResponse>
     {
         private readonly IRequestContext _requestContext;
         private readonly IRepository _repository;
 
-        public GetTransactionService(
+        public GetTransactionRequestHandler(
             IRequestContext requestContext,
             IRepository repository)
         {
@@ -28,13 +25,13 @@ namespace Ledger.WebApi.Services
             _repository = repository;
         }
 
-        public async Task<TransactionModel> ExecuteAsync(Guid id, CancellationToken cancellationToken)
+        public async Task<GetTransactionResponse> Handle(GetTransactionRequest request, CancellationToken cancellationToken)
         {
-            var transaction = await GetTransactionAsync(id, cancellationToken);
+            var transaction = await GetTransactionAsync(request.Id, cancellationToken);
 
             if (transaction == null)
             {
-                return null;
+                return new GetTransactionResponse();
             }
 
             var transactionModel = new TransactionModel
@@ -44,14 +41,14 @@ namespace Ledger.WebApi.Services
                 Description = transaction.Description,
             };
 
-            var postings = await GetPostingsAsync(id, cancellationToken);
+            var postings = await GetPostingsAsync(request.Id, cancellationToken);
 
             foreach (var posting in postings)
             {
-                transactionModel.Postings.Add(new PostingModel 
+                transactionModel.Postings.Add(new TransactionModel.Posting 
                 {
                     Amount = posting.Amount,
-                    Account = new AccountModel
+                    Account = new TransactionModel.Account
                     {
                         Name = posting.AccountName,
                         Id = posting.AccountId,
@@ -59,7 +56,7 @@ namespace Ledger.WebApi.Services
                 });
             }
 
-            return transactionModel;
+            return new GetTransactionResponse {Transaction = transactionModel};
         }
 
         private async Task<Transaction> GetTransactionAsync(Guid id, CancellationToken cancellationToken)

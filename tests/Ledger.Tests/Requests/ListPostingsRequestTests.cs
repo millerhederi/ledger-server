@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Linq;
 using Ledger.WebApi.Models;
+using Ledger.WebApi.Requests;
 using NUnit.Framework;
 
-namespace Ledger.Tests.Services
+namespace Ledger.Tests.Requests
 {
-    public class ListPostingsServiceTests : TestBase
+    public class ListPostingsRequestTests : TestBase
     {
         private static readonly AccountModel CreditCardAccount = new AccountModel
         {
@@ -28,8 +28,8 @@ namespace Ledger.Tests.Services
                 PostedDate = new DateTime(2020, 3, 26),
                 Postings =
                 {
-                    new PostingModel { Amount = 87.34m, Account = FoodAccount },
-                    new PostingModel { Amount = -87.34m, Account = CreditCardAccount }
+                    new TransactionModel.Posting { Amount = 87.34m, Account = new TransactionModel.Account {Id = FoodAccount.Id, Name = FoodAccount.Name}},
+                    new TransactionModel.Posting { Amount = -87.34m, Account = new TransactionModel.Account {Id = CreditCardAccount.Id, Name = CreditCardAccount.Name}}
                 }
             },
             new TransactionModel
@@ -39,8 +39,8 @@ namespace Ledger.Tests.Services
                 PostedDate = new DateTime(2020, 3, 28),
                 Postings =
                 {
-                    new PostingModel { Amount = 14m, Account = FoodAccount },
-                    new PostingModel { Amount = -14m, Account = CreditCardAccount }
+                    new TransactionModel.Posting { Amount = 14m, Account = new TransactionModel.Account {Id = FoodAccount.Id, Name = FoodAccount.Name} },
+                    new TransactionModel.Posting { Amount = -14m, Account = new TransactionModel.Account {Id = CreditCardAccount.Id, Name = CreditCardAccount.Name} }
                 }
             },
         };
@@ -48,20 +48,20 @@ namespace Ledger.Tests.Services
         [Test]
         public void ShouldListPostings()
         {
-            var postings = GetBuilderWithSetupTransactions()
-                .ListPostings(FoodAccount.Id)
+            var response = GetBuilderWithSetupTransactions()
+                .ExecuteRequest(new ListPostingsRequest(FoodAccount.Id))
                 .Result;
 
             var expectedPostings = new []
             {
-                new AccountPostingModel
+                new ListPostingsResponse.Posting
                 {
                     Amount = 14m,
                     PostedDate = TransactionModels[1].PostedDate,
                     Description = TransactionModels[1].Description,
                     TransactionId = TransactionModels[1].Id,
                 },
-                new AccountPostingModel
+                new ListPostingsResponse.Posting
                 {
                     Amount = 87.34m,
                     PostedDate = TransactionModels[0].PostedDate,
@@ -70,7 +70,7 @@ namespace Ledger.Tests.Services
                 },
             };
 
-            expectedPostings.AssertEquals(postings);
+            expectedPostings.AssertEquals(response.Items);
         }
 
         private static TestBuilder GetBuilderWithSetupTransactions()

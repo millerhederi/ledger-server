@@ -7,24 +7,21 @@ using System.Threading.Tasks;
 using Dapper;
 using Ledger.WebApi.Concept;
 using Ledger.WebApi.DataAccess;
+using Ledger.WebApi.Requests;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Ledger.WebApi.Services
+namespace Ledger.WebApi.RequestHandlers
 {
-    public interface IAuthenticateUserService
-    {
-        Task<string> ExecuteAsync(string userName, string password, CancellationToken cancellationToken);
-    }
-
-    public class AuthenticateUserService : IAuthenticateUserService
+    public class BuildUserJwtTokenRequestHandler : IRequestHandler<BuildUserJwtTokenRequest, BuildUserJwtTokenResponse>
     {
         public const string UserIdClaimName = "UserId";
 
         private readonly IConfiguration _configuration;
         private readonly IRepository _repository;
 
-        public AuthenticateUserService(
+        public BuildUserJwtTokenRequestHandler(
             IConfiguration configuration,
             IRepository repository)
         {
@@ -32,10 +29,10 @@ namespace Ledger.WebApi.Services
             _repository = repository;
         }
 
-        public async Task<string> ExecuteAsync(string userName, string password, CancellationToken cancellationToken)
+        public async Task<BuildUserJwtTokenResponse> Handle(BuildUserJwtTokenRequest request, CancellationToken cancellationToken)
         {
             var parameters = new DynamicParameters();
-            parameters.Add("UserName", userName);
+            parameters.Add("UserName", request.UserName);
 
             var user = await _repository
                 .QuerySingleOrDefaultAsync<User>(new CommandDefinition(
@@ -44,12 +41,17 @@ namespace Ledger.WebApi.Services
                     cancellationToken: cancellationToken));
 
             // Todo: hard coding the password for now until we research hashing options
-            if (user == null || password != "password")
+            if (user == null || request.Password != "password")
             {
-                return null;
+                return new BuildUserJwtTokenResponse();
             }
 
-            return BuildToken(user);
+            var token = BuildToken(user);
+
+            return new BuildUserJwtTokenResponse
+            {
+                Token = token,
+            };
         }
         
         private string BuildToken(User user)

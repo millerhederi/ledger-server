@@ -8,6 +8,18 @@ namespace Ledger.WebApi.Models
         public Guid Id { get; set; }
         public DateTime PostedDate { get; set; }
         public string Description { get; set; }
-        public ICollection<PostingModel> Postings { get; } = new List<PostingModel>();
+        public ICollection<Posting> Postings { get; } = new List<Posting>();
+
+        public class Posting
+        {
+            public Account Account { get; set; }
+            public decimal Amount { get; set; }
+        }
+
+        public class Account
+        {
+            public Guid Id { get; set; }
+            public string Name { get; set; }
+        }
     }
 }

@@ -3,32 +3,28 @@ using System.Threading;
 using System.Threading.Tasks;
 using Ledger.WebApi.Concept;
 using Ledger.WebApi.DataAccess;
-using Ledger.WebApi.Models;
+using Ledger.WebApi.Requests;
+using MediatR;
 
-namespace Ledger.WebApi.Services
+namespace Ledger.WebApi.RequestHandlers
 {
-    public interface IUpsertAccountService
-    {
-        Task<Guid> ExecuteAsync(AccountModel model, CancellationToken cancellationToken);
-    }
-
-    public class UpsertAccountService : IUpsertAccountService
+    public class UpsertAccountRequestHandler : IRequestHandler<UpsertAccountRequest, UpsertAccountResponse>
     {
         private readonly IRepository _repository;
         private readonly IRequestContext _requestContext;
 
-        public UpsertAccountService(IRepository repository, IRequestContext requestContext)
+        public UpsertAccountRequestHandler(IRepository repository, IRequestContext requestContext)
         {
             _repository = repository;
             _requestContext = requestContext;
         }
 
-        public async Task<Guid> ExecuteAsync(AccountModel model, CancellationToken cancellationToken)
+        public async Task<UpsertAccountResponse> Handle(UpsertAccountRequest request, CancellationToken cancellationToken)
         {
             var account = new Account
             {
-                Id = model.Id == Guid.Empty ? Guid.NewGuid() : model.Id,
-                Name = model.Name,
+                Id = request.Account.Id == Guid.Empty ? Guid.NewGuid() : request.Account.Id,
+                Name = request.Account.Name,
                 UserId = _requestContext.UserId,
                 CreatedTimestamp = DateTime.UtcNow,
                 UpdatedTimestamp = DateTime.UtcNow,
@@ -36,7 +32,7 @@ namespace Ledger.WebApi.Services
 
             await _repository.UpsertAsync(account, cancellationToken);
 
-            return account.Id;
+            return new UpsertAccountResponse {Id = account.Id};
         }
     }
 }

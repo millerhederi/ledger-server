@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,24 +8,17 @@ using Dapper;
 using Ledger.WebApi.Concept;
 using Ledger.WebApi.DataAccess;
 using Ledger.WebApi.Models;
+using Ledger.WebApi.Requests;
+using MediatR;
 
-namespace Ledger.WebApi.Services
+namespace Ledger.WebApi.RequestHandlers
 {
-    public interface IListTransactionsService
+    public class ListTransactionsRequestHandler : IRequestHandler<ListTransactionsRequest, ListTransactionsResponse>
     {
-        Task<ICollection<TransactionModel>> ExecuteAsync(int skip, int take, CancellationToken cancellationToken);
-
-        Task<ICollection<TransactionModel>> ExecuteAsync(CancellationToken cancellationToken);
-    }
-
-    public class ListTransactionsService : IListTransactionsService
-    {
-        private const int MaxTake = 50;
-
         private readonly IRequestContext _requestContext;
         private readonly IRepository _repository;
 
-        public ListTransactionsService(
+        public ListTransactionsRequestHandler(
             IRequestContext requestContext,
             IRepository repository)
         {
@@ -32,10 +26,7 @@ namespace Ledger.WebApi.Services
             _repository = repository;
         }
 
-        public async Task<ICollection<TransactionModel>> ExecuteAsync(
-            int skip,
-            int take,
-            CancellationToken cancellationToken)
+        public async Task<ListTransactionsResponse> Handle(ListTransactionsRequest request, CancellationToken cancellationToken)
         {
             const string sql = @"
 create table #temp
@@ -71,17 +62,16 @@ order by p.[TransactionId], p.[Id];
 
             var parameters = new DynamicParameters();
             parameters.Add("UserId", _requestContext.UserId);
-            parameters.Add("Skip", skip);
-            parameters.Add("Take", take);
+            parameters.Add("Skip", request.Skip);
+            parameters.Add("Take", request.Take);
 
             var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
+            var items = await _repository.QueryMultipleAsync(command, GetTransactionModelsAsync);
 
-            return await _repository.QueryMultipleAsync(command, GetTransactionModelsAsync);
-        }
-
-        public Task<ICollection<TransactionModel>> ExecuteAsync(CancellationToken cancellationToken)
-        {
-            return ExecuteAsync(0, MaxTake, cancellationToken);
+            return new ListTransactionsResponse
+            {
+                Items = items,
+            };
         }
 
         private static async Task<ICollection<TransactionModel>> GetTransactionModelsAsync(SqlMapper.GridReader reader)
@@ -108,9 +98,9 @@ order by p.[TransactionId], p.[Id];
                 {
                     foreach (var posting in transactionPostings)
                     {
-                        var postingModel = new PostingModel
+                        var postingModel = new TransactionModel.Posting
                         {
-                            Account = new AccountModel { Id = posting.AccountId, Name = posting.AccountName },
+                            Account = new TransactionModel.Account { Id = posting.AccountId, Name = posting.AccountName },
                             Amount = posting.Amount,
                         };
 
@@ -125,6 +115,8 @@ order by p.[TransactionId], p.[Id];
             return transactionModels;
         }
 
+        [SuppressMessage("ReSharper", "ClassNeverInstantiated.Local")]
+        [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
         private class PostingDto
         {
             public Guid TransactionId { get; set; }

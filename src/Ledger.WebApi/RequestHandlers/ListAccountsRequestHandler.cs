@@ -1,25 +1,21 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using Ledger.WebApi.Concept;
 using Ledger.WebApi.DataAccess;
 using Ledger.WebApi.Models;
+using Ledger.WebApi.Requests;
+using MediatR;
 
-namespace Ledger.WebApi.Services
+namespace Ledger.WebApi.RequestHandlers
 {
-    public interface IListAccountsService
-    {
-        Task<ICollection<AccountModel>> ExecuteAsync(CancellationToken cancellationToken);
-    }
-
-    public class ListAccountsService : IListAccountsService
+    public class ListAccountsRequestHandler : IRequestHandler<ListAccountsRequest, ListAccountsResponse>
     {
         private readonly IRepository _repository;
         private readonly IRequestContext _requestContext;
 
-        public ListAccountsService(
+        public ListAccountsRequestHandler(
             IRepository repository,
             IRequestContext requestContext)
         {
@@ -27,33 +23,30 @@ namespace Ledger.WebApi.Services
             _requestContext = requestContext;
         }
 
-        public async Task<ICollection<AccountModel>> ExecuteAsync(CancellationToken cancellationToken)
+        public async Task<ListAccountsResponse> Handle(ListAccountsRequest request, CancellationToken cancellationToken)
         {
             const string sql = @"
 select
     *
 from [dbo].[Account] a
-where a.[UserId] = @UserId";
+where a.[UserId] = @UserId
+order by a.[Name]";
 
             var parameters = new DynamicParameters();
             parameters.Add("UserId", _requestContext.UserId);
 
             var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
-            var accounts = (await _repository.QueryAsync<Account>(command)).ToList();
-
-            if (accounts.Count == 0)
-            {
-                return new List<AccountModel>();
-            }
-
-            return accounts
-                .Select(x => new AccountModel
+            var accounts = await _repository.QueryAsync<Account>(command);
+            var items = accounts.Select(x => new AccountModel
                 {
                     Id = x.Id,
                     Name = x.Name,
-                })
-                .OrderBy(x => x.Name)
-                .ToList();
+                }).ToList();
+
+            return new ListAccountsResponse
+            {
+                Items = items,
+            };
         }
     }
 }

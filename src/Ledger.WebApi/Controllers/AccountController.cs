@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Ledger.WebApi.Models;
-using Ledger.WebApi.Services;
+using Ledger.WebApi.Requests;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ledger.WebApi.Controllers
@@ -12,42 +11,35 @@ namespace Ledger.WebApi.Controllers
     [Route("api/[controller]")]
     public class AccountController : ControllerBase
     {
-        private readonly IListAccountsService _listAccountsService;
-        private readonly IListPostingsService _listPostingsService;
-        private readonly IGetPostingTotalsByMonthService _getPostingTotalsByMonthService;
+        private readonly IMediator _mediator;
 
-        public AccountController(
-            IListAccountsService listAccountsService, 
-            IListPostingsService listPostingsService,
-            IGetPostingTotalsByMonthService getPostingTotalsByMonthService)
+        public AccountController(IMediator mediator)
         {
-            _listAccountsService = listAccountsService;
-            _listPostingsService = listPostingsService;
-            _getPostingTotalsByMonthService = getPostingTotalsByMonthService;
+            _mediator = mediator;
         }
 
         [HttpGet]
-        public async Task<IEnumerable<AccountModel>> ListAccountsAsync(CancellationToken cancellationToken)
+        public async Task<ListAccountsResponse> ListAccountsAsync(CancellationToken cancellationToken)
         {
-            return await _listAccountsService.ExecuteAsync(cancellationToken);
+            return await _mediator.Send(new ListAccountsRequest(), cancellationToken);
         }
 
         [HttpGet]
         [Route("{accountId}/posting")]
-        public async Task<ICollection<AccountPostingModel>> ListAccountPostings(
+        public async Task<ListPostingsResponse> ListAccountPostings(
             [FromRoute] Guid accountId,
             CancellationToken cancellationToken)
         {
-            return await _listPostingsService.ExecuteAsync(accountId, cancellationToken);
+            return await _mediator.Send(new ListPostingsRequest(accountId), cancellationToken);
         }
 
         [HttpGet]
         [Route("{accountId}/posting/monthly")]
-        public async Task<ICollection<MonthlyPostingTotalModel>> GetMonthlyAggregates(
+        public async Task<GetPostingAggregatesResponse> GetMonthlyAggregates(
             [FromRoute] Guid accountId,
             CancellationToken cancellationToken)
         {
-            return await _getPostingTotalsByMonthService.ExecuteAsync(accountId, cancellationToken);
+            return await _mediator.Send(new GetPostingAggregatesRequest(accountId), cancellationToken);
         }
     }
 }

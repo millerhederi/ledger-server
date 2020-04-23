@@ -1,32 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using Ledger.WebApi.Concept;
-using Ledger.WebApi.Models;
+using Ledger.WebApi.Requests;
+using MediatR;
 
-namespace Ledger.WebApi.Services
+namespace Ledger.WebApi.RequestHandlers
 {
-    public interface IListPostingsService
-    {
-        Task<ICollection<AccountPostingModel>> ExecuteAsync(Guid accountId, CancellationToken cancellationToken);
-    }
-
-    public class ListPostingsService : IListPostingsService
+    public class ListPostingsRequestHandler : IRequestHandler<ListPostingsRequest, ListPostingsResponse>
     {
         private readonly IRepository _repository;
         private readonly IRequestContext _requestContext;
 
-        public ListPostingsService(IRepository repository, IRequestContext requestContext)
+        public ListPostingsRequestHandler(IRepository repository, IRequestContext requestContext)
         {
             _repository = repository;
             _requestContext = requestContext;
         }
 
-        public async Task<ICollection<AccountPostingModel>> ExecuteAsync(Guid accountId, CancellationToken cancellationToken)
+        public async Task<ListPostingsResponse> Handle(ListPostingsRequest request, CancellationToken cancellationToken)
         {
             const string sql = @"
 select
@@ -43,21 +38,25 @@ where t.[UserId] = @UserId
 order by t.[PostedDate] desc, t.[Id], p.[Id]";
 
             var parameters = new DynamicParameters();
-            parameters.Add("AccountId", accountId);
+            parameters.Add("AccountId", request.AccountId);
             parameters.Add("UserId", _requestContext.UserId);
 
             var command = new CommandDefinition(sql, parameters, cancellationToken: cancellationToken);
 
-            var postings = await _repository.QueryAsync<PostingDto>(command);
+            var dtos = await _repository.QueryAsync<PostingDto>(command);
+            var items = dtos.Select(x => new ListPostingsResponse.Posting
+                {
+                    Amount = x.Amount,
+                    Id = x.PostingId,
+                    PostedDate = x.PostedDate,
+                    Description = x.Description,
+                    TransactionId = x.TransactionId,
+                }).ToList();
 
-            return postings.Select(x => new AccountPostingModel
+            return new ListPostingsResponse
             {
-                Amount = x.Amount,
-                Id = x.PostingId,
-                PostedDate = x.PostedDate,
-                Description = x.Description,
-                TransactionId = x.TransactionId,
-            }).ToList();
+                Items = items,
+            };
         }
 
         [SuppressMessage("ReSharper", "ClassNeverInstantiated.Local")]

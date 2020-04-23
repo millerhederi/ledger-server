@@ -2,7 +2,6 @@ using System.Reflection;
 using System.Text;
 using Ledger.WebApi.Concept;
 using Ledger.WebApi.Filters;
-using Ledger.WebApi.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -25,17 +24,10 @@ namespace Ledger.WebApi
 
         public static void ConfigureIoc(IServiceCollection services)
         {
-            services.AddTransient<IAuthenticateUserService, AuthenticateUserService>();
-            services.AddTransient<IGetTransactionService, GetTransactionService>();
-            services.AddTransient<IListTransactionsService, ListTransactionsService>();
-            services.AddTransient<IUpsertTransactionService, UpsertTransactionService>();
-            services.AddTransient<IListAccountsService, ListAccountsService>();
-            services.AddTransient<IAddUserService, AddUserService>();
-            services.AddTransient<IUpsertAccountService, UpsertAccountService>();
-            services.AddTransient<IListPostingsService, ListPostingsService>();
-            services.AddTransient<IGetPostingTotalsByMonthService, GetPostingTotalsByMonthService>();
             services.AddSingleton<IRepository, Repository>();
             services.AddScoped<IRequestContext, RequestContext>();
+
+            services.AddMediatR(Assembly.GetExecutingAssembly());
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -68,8 +60,6 @@ namespace Ledger.WebApi
             {
                 options.Filters.Add<RequestContextFilter>();
             });
-
-            services.AddMediatR(Assembly.GetExecutingAssembly());
 
             ConfigureIoc(services);
         }

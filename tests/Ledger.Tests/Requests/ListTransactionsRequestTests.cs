@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Linq;
 using Ledger.WebApi.Models;
+using Ledger.WebApi.Requests;
 using NUnit.Framework;
 
-namespace Ledger.Tests.Services
+namespace Ledger.Tests.Requests
 {
-    public class ListTransactionsServiceTests : TestBase
+    public class ListTransactionsRequestTests : TestBase
     {
         private static readonly AccountModel CreditCardAccount = new AccountModel
         {
@@ -33,8 +34,8 @@ namespace Ledger.Tests.Services
                 PostedDate = new DateTime(2020, 3, 26),
                 Postings =
                 {
-                    new PostingModel { Amount = 87.34m, Account = FoodAccount },
-                    new PostingModel { Amount = -87.34m, Account = CreditCardAccount }
+                    new TransactionModel.Posting { Amount = 87.34m, Account = new TransactionModel.Account {Id = FoodAccount.Id, Name = FoodAccount.Name}},
+                    new TransactionModel.Posting { Amount = -87.34m, Account = new TransactionModel.Account {Id = CreditCardAccount.Id, Name = CreditCardAccount.Name}},
                 }
             },
             new TransactionModel
@@ -43,8 +44,8 @@ namespace Ledger.Tests.Services
                 PostedDate = new DateTime(2020, 3, 28),
                 Postings =
                 {
-                    new PostingModel { Amount = 14m, Account = DiscretionaryAccount },
-                    new PostingModel { Amount = -14m, Account = CreditCardAccount }
+                    new TransactionModel.Posting { Amount = 14m, Account = new TransactionModel.Account {Id = DiscretionaryAccount.Id, Name = DiscretionaryAccount.Name}},
+                    new TransactionModel.Posting { Amount = -14m, Account = new TransactionModel.Account {Id = CreditCardAccount.Id, Name = CreditCardAccount.Name}},
                 }
             },
         };
@@ -52,42 +53,46 @@ namespace Ledger.Tests.Services
         [Test]
         public void ShouldGetTransactions()
         {
-            var builder = GetBuilderWithSetupTransactions();
+            var items = GetBuilderWithSetupTransactions()
+                .ExecuteRequest(new ListTransactionsRequest())
+                .Result
+                .Items;
 
-            var actualTransactions = builder.ListTransactions().Result;
-
-            TransactionModels.AssertEquals(actualTransactions);
+            TransactionModels.AssertEquals(items);
         }
 
         [Test]
         public void ShouldHandleSkip()
         {
-            var transactions = GetBuilderWithSetupTransactions()
-                .ListTransactions(1, 100)
-                .Result;
+            var items = GetBuilderWithSetupTransactions()
+                .ExecuteRequest(new ListTransactionsRequest { Skip = 1 })
+                .Result
+                .Items;
 
-            TransactionModels.Skip(1).AssertEquals(transactions);
+            TransactionModels.Skip(1).AssertEquals(items);
         }
 
         [Test]
         public void ShouldHandleTake()
         {
-            var transactions = GetBuilderWithSetupTransactions()
-                .ListTransactions(0, 1)
-                .Result;
+            var items = GetBuilderWithSetupTransactions()
+                .ExecuteRequest(new ListTransactionsRequest { Take = 1 })
+                .Result
+                .Items;
 
-            TransactionModels.Take(1).AssertEquals(transactions);
+            TransactionModels.Take(1).AssertEquals(items);
         }
 
         [Test]
         public void ShouldOnlyReturnTransactionsForCorrectUser()
         {
-            var transactions = GetBuilderWithSetupTransactions()
+            var items = GetBuilderWithSetupTransactions()
                 .AsUser()
-                .ListTransactions()
-                .Result;
+                .ExecuteRequest(new ListTransactionsRequest())
+                .Result
+                .Items;
 
-            Enumerable.Empty<TransactionModel>().AssertEquals(transactions);
+            Enumerable.Empty<TransactionModel>().AssertEquals(items);
         }
 
         private static TestBuilder GetBuilderWithSetupTransactions()

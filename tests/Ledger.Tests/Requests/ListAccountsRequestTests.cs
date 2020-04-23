@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
 using Ledger.WebApi.Models;
+using Ledger.WebApi.Requests;
 using NUnit.Framework;
 
-namespace Ledger.Tests.Services
+namespace Ledger.Tests.Requests
 {
-    public class ListAccountsServiceTests : TestBase
+    public class ListAccountsRequestTests : TestBase
     {
         [Test]
-        public void ShouldGetAccounts()
+        public void ShouldListAccounts()
         {
             var builder = TestBuilder.Begin()
                 .AsUser();
@@ -16,9 +17,6 @@ namespace Ledger.Tests.Services
             {
                 new AccountModel { Name = "assets:checking:boa" },
                 new AccountModel { Name = "expenses:food" },
-                new AccountModel { Name = "expenses:housing" },
-                new AccountModel { Name = "expenses:transportation" },
-                new AccountModel { Name = "liabilities:cc:visa" },
             };
 
             foreach (var account in accountModels)
@@ -26,9 +24,9 @@ namespace Ledger.Tests.Services
                 builder.UpsertAccount(account);
             }
 
-            var actualAccounts = builder.ListAccounts().Result;
+            var response = builder.ExecuteRequest(new ListAccountsRequest()).Result;
 
-            accountModels.AssertEquals(actualAccounts);
+            accountModels.AssertEquals(response.Items);
         }
     }
 }

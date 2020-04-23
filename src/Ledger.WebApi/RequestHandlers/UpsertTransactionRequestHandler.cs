@@ -6,42 +6,38 @@ using System.Transactions;
 using Dapper;
 using Ledger.WebApi.Concept;
 using Ledger.WebApi.DataAccess;
-using Ledger.WebApi.Models;
+using Ledger.WebApi.Requests;
+using MediatR;
 using Transaction = Ledger.WebApi.DataAccess.Transaction;
 
-namespace Ledger.WebApi.Services
+namespace Ledger.WebApi.RequestHandlers
 {
-    public interface IUpsertTransactionService
-    {
-        Task<Guid> ExecuteAsync(TransactionModel transactionModel, CancellationToken cancellationToken);
-    }
-
-    public class UpsertTransactionService : IUpsertTransactionService
+    public class UpsertTransactionRequestHandler : IRequestHandler<UpsertTransactionRequest, UpsertTransactionResponse>
     {
         private readonly IRequestContext _requestContext;
         private readonly IRepository _repository;
 
-        public UpsertTransactionService(IRequestContext requestContext, IRepository repository)
+        public UpsertTransactionRequestHandler(IRequestContext requestContext, IRepository repository)
         {
             _requestContext = requestContext;
             _repository = repository;
         }
 
-        public async Task<Guid> ExecuteAsync(TransactionModel transactionModel, CancellationToken cancellationToken)
+        public async Task<UpsertTransactionResponse> Handle(UpsertTransactionRequest request, CancellationToken cancellationToken)
         {
             var currentTimestamp = DateTime.UtcNow;
 
             var transaction = new Transaction
             {
-                Id = transactionModel.Id == Guid.Empty ? Guid.NewGuid() : transactionModel.Id,
+                Id = request.Transaction.Id == Guid.Empty ? Guid.NewGuid() : request.Transaction.Id,
                 UserId = _requestContext.UserId,
-                Description = transactionModel.Description,
-                PostedDate = transactionModel.PostedDate,
+                Description = request.Transaction.Description,
+                PostedDate = request.Transaction.PostedDate,
                 CreatedTimestamp = currentTimestamp,
                 UpdatedTimestamp = currentTimestamp,
             };
 
-            var postings = transactionModel.Postings.Select(x => new Posting
+            var postings = request.Transaction.Postings.Select(x => new Posting
             {
                 Id = Guid.NewGuid(),
                 AccountId = x.Account.Id,
@@ -61,7 +57,7 @@ namespace Ledger.WebApi.Services
                 tx.Complete();
             }
 
-            return transaction.Id;
+            return new UpsertTransactionResponse {Id = transaction.Id};
         }
 
         private async Task DeletePostingsForTransactionAsync(Guid transactionId, CancellationToken cancellationToken)

@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using Ledger.WebApi;
 using Ledger.WebApi.Concept;
 using Ledger.WebApi.Models;
-using Ledger.WebApi.Services;
+using Ledger.WebApi.Requests;
+using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
@@ -60,54 +60,29 @@ namespace Ledger.Tests
 
         public TestBuilder<Guid> AsUser()
         {
-            var builder = AddUser(new LoginModel {UserName = Guid.NewGuid().ToString(), Password = "Password123!"});
-            builder.AsUser(builder.Result);
-            return builder;
-        }
-
-        public TestBuilder<Guid> AddUser(LoginModel model)
-        {
-            return WithResult(GetInstance<IAddUserService>().ExecuteAsync(model, CancellationToken.None).Result);
+            var builder = ExecuteRequest(new AddUserRequest {UserName = Guid.NewGuid().ToString(), Password = "Password123!"});
+            builder.AsUser(builder.Result.Id);
+            return WithResult(builder.Result.Id);
         }
 
         public TestBuilder<Guid> UpsertAccount(AccountModel model)
         {
-            return WithResult(GetInstance<IUpsertAccountService>().ExecuteAsync(model, CancellationToken.None).Result);
-        }
-
-        public TestBuilder<ICollection<AccountModel>> ListAccounts()
-        {
-            return WithResult(GetInstance<IListAccountsService>().ExecuteAsync(CancellationToken.None).Result);
-        }
-
-        public TestBuilder<ICollection<AccountPostingModel>> ListPostings(Guid accountId)
-        {
-            return WithResult(GetInstance<IListPostingsService>().ExecuteAsync(accountId, CancellationToken.None).Result);
+            return WithResult(ExecuteRequest(new UpsertAccountRequest {Account = model}).Result.Id);
         }
 
         public TestBuilder<Guid> UpsertTransaction(TransactionModel model)
         {
-            return WithResult(GetInstance<IUpsertTransactionService>().ExecuteAsync(model, CancellationToken.None).Result);
+            return WithResult(ExecuteRequest(new UpsertTransactionRequest {Transaction = model}).Result.Id);
         }
 
         public TestBuilder<TransactionModel> GetTransaction(Guid id)
         {
-            return WithResult(GetInstance<IGetTransactionService>().ExecuteAsync(id, CancellationToken.None).Result);
+            return WithResult(ExecuteRequest(new GetTransactionRequest(id)).Result.Transaction);
         }
 
-        public TestBuilder<ICollection<TransactionModel>> ListTransactions(int skip, int take)
+        public TestBuilder<TResponse> ExecuteRequest<TResponse>(IRequest<TResponse> request)
         {
-            return WithResult(GetInstance<IListTransactionsService>().ExecuteAsync(skip, take, CancellationToken.None).Result);
-        }
-
-        public TestBuilder<ICollection<TransactionModel>> ListTransactions()
-        {
-            return WithResult(GetInstance<IListTransactionsService>().ExecuteAsync(CancellationToken.None).Result);
-        }
-
-        public TestBuilder<ICollection<MonthlyPostingTotalModel>> GetPostingTotalsByMonth(Guid accountId)
-        {
-            return WithResult(GetInstance<IGetPostingTotalsByMonthService>().ExecuteAsync(accountId, CancellationToken.None).Result);
+            return WithResult(GetInstance<IMediator>().Send(request, CancellationToken.None).Result);
         }
 
         public T GetInstance<T>() => _serviceProvider.GetRequiredService<T>();

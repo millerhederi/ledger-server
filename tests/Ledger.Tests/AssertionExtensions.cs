@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using Ledger.WebApi.Models;
+using Ledger.WebApi.Requests;
 using NUnit.Framework;
 
 namespace Ledger.Tests
 {
     public static class AssertionExtensions
     {
-        #region AccountModel
         public static void AssertEquals(this IEnumerable<AccountModel> expected, IEnumerable<AccountModel> actual)
         {
             AssertCollectionsEqual(expected, actual, (e, a) => e.AssertEquals(a));
@@ -18,9 +18,7 @@ namespace Ledger.Tests
         {
             Assert.AreEqual(expected.Name, actual.Name, nameof(expected.Name));
         }
-        #endregion AccountModel
 
-        #region TransactionModel
         public static void AssertEquals(this IEnumerable<TransactionModel> expected, IEnumerable<TransactionModel> actual)
         {
             AssertCollectionsEqual(expected, actual, (e, a) => e.AssertEquals(a));
@@ -33,43 +31,42 @@ namespace Ledger.Tests
 
             SortedPostings(expected.Postings).AssertEquals(SortedPostings(actual.Postings));
 
-            static IEnumerable<PostingModel> SortedPostings(IEnumerable<PostingModel> postings)
+            static IEnumerable<TransactionModel.Posting> SortedPostings(IEnumerable<TransactionModel.Posting> postings)
             {
                 // Try to make sorting deterministic so that we can assert on the collections
                 return postings.OrderBy(x => x.Amount);
             }
         }
-        #endregion TransactionModel
 
-        #region PostingModel
-        public static void AssertEquals(this IEnumerable<PostingModel> expected, IEnumerable<PostingModel> actual)
+        public static void AssertEquals(this IEnumerable<TransactionModel.Posting> expected, IEnumerable<TransactionModel.Posting> actual)
         {
             AssertCollectionsEqual(expected, actual, (e, a) => e.AssertEquals(a));
         }
 
-        public static void AssertEquals(this PostingModel expected, PostingModel actual)
+        public static void AssertEquals(this TransactionModel.Posting expected, TransactionModel.Posting actual)
         {
             Assert.AreEqual(expected.Amount, actual.Amount);
+            
             expected.Account.AssertEquals(actual.Account);
         }
-        #endregion PostingModel
 
-        #region AccountPostingModel
+        public static void AssertEquals(this TransactionModel.Account expected, TransactionModel.Account actual)
+        {
+            Assert.AreEqual(expected.Name, actual.Name);
+        }
 
-        public static void AssertEquals(this IEnumerable<AccountPostingModel> expected,  IEnumerable<AccountPostingModel> actual)
+        public static void AssertEquals(this IEnumerable<ListPostingsResponse.Posting> expected,  IEnumerable<ListPostingsResponse.Posting> actual)
         {
             AssertCollectionsEqual(expected, actual, (e, a) => e.AssertEquals(a));
         }
 
-        public static void AssertEquals(this AccountPostingModel expected, AccountPostingModel actual)
+        public static void AssertEquals(this ListPostingsResponse.Posting expected, ListPostingsResponse.Posting actual)
         {
             Assert.AreEqual(expected.Amount, actual.Amount);
             Assert.AreEqual(expected.Description, actual.Description);
             Assert.AreEqual(expected.PostedDate, actual.PostedDate);
             Assert.AreEqual(expected.TransactionId, actual.TransactionId);
         }
-
-        #endregion
 
         private static void AssertCollectionsEqual<T>(IEnumerable<T> expected, IEnumerable<T> actual, Action<T, T> assertionFn)
         {

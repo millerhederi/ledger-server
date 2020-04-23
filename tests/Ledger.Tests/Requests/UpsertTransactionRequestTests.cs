@@ -2,9 +2,9 @@
 using Ledger.WebApi.Models;
 using NUnit.Framework;
 
-namespace Ledger.Tests.Services
+namespace Ledger.Tests.Requests
 {
-    public class UpsertTransactionServiceTests : TestBase
+    public class UpsertTransactionRequestTests : TestBase
     {
         [Test]
         public void ShouldInsertTransaction()
