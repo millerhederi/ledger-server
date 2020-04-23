@@ -19,7 +19,6 @@
     },
     "Ledger.WebApi": {
       "commandName": "Project",
-      "launchBrowser": true,
       "launchUrl": "api/status/ping",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
