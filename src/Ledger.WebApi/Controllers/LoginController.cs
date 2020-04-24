@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Ledger.WebApi.Concept;
 using Ledger.WebApi.Requests;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,20 +11,20 @@ namespace Ledger.WebApi.Controllers
     [Route("api/[controller]")]
     public class LoginController
     {
-        private readonly IMediator _mediator;
+        private readonly IRequestProcessingPipeline _pipeline;
 
-        public LoginController(IMediator mediator)
+        public LoginController(IRequestProcessingPipeline pipeline)
         {
-            _mediator = mediator;
+            _pipeline = pipeline;
         }
         
         [AllowAnonymous]
         [HttpPost]
-        public async Task<ActionResult<BuildUserJwtTokenResponse>> CreateTokenAsync([FromBody] BuildUserJwtTokenRequest request, CancellationToken cancellationToken)
+        public async Task<ActionResult<ResponseEnvelope<BuildUserJwtTokenResponse>>> CreateTokenAsync([FromBody] BuildUserJwtTokenRequest request, CancellationToken cancellationToken)
         {
-            var response = await _mediator.Send(request, cancellationToken);
+            var response = await _pipeline.ExecuteAsync(request, cancellationToken);
             
-            if (response.Token == null)
+            if (response.Data?.Token == null)
             {
                 return new UnauthorizedResult();
             }

@@ -6,11 +6,10 @@ using Ledger.WebApi.Concept;
 using Ledger.WebApi.DataAccess;
 using Ledger.WebApi.Models;
 using Ledger.WebApi.Requests;
-using MediatR;
 
 namespace Ledger.WebApi.RequestHandlers
 {
-    public class ListAccountsRequestHandler : IRequestHandler<ListAccountsRequest, ListAccountsResponse>
+    public class ListAccountsRequestHandler : RequestHandler<ListAccountsRequest, ListAccountsResponse>
     {
         private readonly IRepository _repository;
         private readonly IRequestContext _requestContext;
@@ -23,7 +22,7 @@ namespace Ledger.WebApi.RequestHandlers
             _requestContext = requestContext;
         }
 
-        public async Task<ListAccountsResponse> Handle(ListAccountsRequest request, CancellationToken cancellationToken)
+        protected override async Task<ListAccountsResponse> HandleAsync(ListAccountsRequest request, CancellationToken cancellationToken)
         {
             const string sql = @"
 select

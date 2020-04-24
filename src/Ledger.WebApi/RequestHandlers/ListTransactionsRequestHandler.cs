@@ -9,11 +9,10 @@ using Ledger.WebApi.Concept;
 using Ledger.WebApi.DataAccess;
 using Ledger.WebApi.Models;
 using Ledger.WebApi.Requests;
-using MediatR;
 
 namespace Ledger.WebApi.RequestHandlers
 {
-    public class ListTransactionsRequestHandler : IRequestHandler<ListTransactionsRequest, ListTransactionsResponse>
+    public class ListTransactionsRequestHandler : RequestHandler<ListTransactionsRequest, ListTransactionsResponse>
     {
         private readonly IRequestContext _requestContext;
         private readonly IRepository _repository;
@@ -26,7 +25,7 @@ namespace Ledger.WebApi.RequestHandlers
             _repository = repository;
         }
 
-        public async Task<ListTransactionsResponse> Handle(ListTransactionsRequest request, CancellationToken cancellationToken)
+        protected override async Task<ListTransactionsResponse> HandleAsync(ListTransactionsRequest request, CancellationToken cancellationToken)
         {
             const string sql = @"
 create table #temp

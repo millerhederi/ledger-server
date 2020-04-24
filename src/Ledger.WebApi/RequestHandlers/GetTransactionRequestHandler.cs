@@ -8,11 +8,10 @@ using Ledger.WebApi.Concept;
 using Ledger.WebApi.DataAccess;
 using Ledger.WebApi.Models;
 using Ledger.WebApi.Requests;
-using MediatR;
 
 namespace Ledger.WebApi.RequestHandlers
 {
-    public class GetTransactionRequestHandler : IRequestHandler<GetTransactionRequest, GetTransactionResponse>
+    public class GetTransactionRequestHandler : RequestHandler<GetTransactionRequest, GetTransactionResponse>
     {
         private readonly IRequestContext _requestContext;
         private readonly IRepository _repository;
@@ -25,7 +24,7 @@ namespace Ledger.WebApi.RequestHandlers
             _repository = repository;
         }
 
-        public async Task<GetTransactionResponse> Handle(GetTransactionRequest request, CancellationToken cancellationToken)
+        protected override async Task<GetTransactionResponse> HandleAsync(GetTransactionRequest request, CancellationToken cancellationToken)
         {
             var transaction = await GetTransactionAsync(request.Id, cancellationToken);
 

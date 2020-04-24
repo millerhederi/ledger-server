@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Ledger.WebApi.Concept;
 using Ledger.WebApi.Requests;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ledger.WebApi.Controllers
@@ -11,35 +11,35 @@ namespace Ledger.WebApi.Controllers
     [Route("api/[controller]")]
     public class AccountController : ControllerBase
     {
-        private readonly IMediator _mediator;
+        private readonly IRequestProcessingPipeline _pipeline;
 
-        public AccountController(IMediator mediator)
+        public AccountController(IRequestProcessingPipeline pipeline)
         {
-            _mediator = mediator;
+            _pipeline = pipeline;
         }
 
         [HttpGet]
-        public async Task<ListAccountsResponse> ListAccountsAsync(CancellationToken cancellationToken)
+        public async Task<ResponseEnvelope<ListAccountsResponse>> ListAccountsAsync(CancellationToken cancellationToken)
         {
-            return await _mediator.Send(new ListAccountsRequest(), cancellationToken);
+            return await _pipeline.ExecuteAsync(new ListAccountsRequest(), cancellationToken);
         }
 
         [HttpGet]
         [Route("{accountId}/posting")]
-        public async Task<ListPostingsResponse> ListAccountPostings(
+        public async Task<ResponseEnvelope<ListPostingsResponse>> ListAccountPostings(
             [FromRoute] Guid accountId,
             CancellationToken cancellationToken)
         {
-            return await _mediator.Send(new ListPostingsRequest(accountId), cancellationToken);
+            return await _pipeline.ExecuteAsync(new ListPostingsRequest(accountId), cancellationToken);
         }
 
         [HttpGet]
         [Route("{accountId}/posting/monthly")]
-        public async Task<GetPostingAggregatesResponse> GetMonthlyAggregates(
+        public async Task<ResponseEnvelope<GetPostingAggregatesResponse>> GetMonthlyAggregates(
             [FromRoute] Guid accountId,
             CancellationToken cancellationToken)
         {
-            return await _mediator.Send(new GetPostingAggregatesRequest(accountId), cancellationToken);
+            return await _pipeline.ExecuteAsync(new GetPostingAggregatesRequest(accountId), cancellationToken);
         }
     }
 }

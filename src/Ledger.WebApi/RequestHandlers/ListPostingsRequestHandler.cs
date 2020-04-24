@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 using Dapper;
 using Ledger.WebApi.Concept;
 using Ledger.WebApi.Requests;
-using MediatR;
 
 namespace Ledger.WebApi.RequestHandlers
 {
-    public class ListPostingsRequestHandler : IRequestHandler<ListPostingsRequest, ListPostingsResponse>
+    public class ListPostingsRequestHandler : RequestHandler<ListPostingsRequest, ListPostingsResponse>
     {
         private readonly IRepository _repository;
         private readonly IRequestContext _requestContext;
@@ -21,7 +20,7 @@ namespace Ledger.WebApi.RequestHandlers
             _requestContext = requestContext;
         }
 
-        public async Task<ListPostingsResponse> Handle(ListPostingsRequest request, CancellationToken cancellationToken)
+        protected override async Task<ListPostingsResponse> HandleAsync(ListPostingsRequest request, CancellationToken cancellationToken)
         {
             const string sql = @"
 select

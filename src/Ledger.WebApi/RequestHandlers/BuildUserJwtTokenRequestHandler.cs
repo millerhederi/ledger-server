@@ -8,13 +8,12 @@ using Dapper;
 using Ledger.WebApi.Concept;
 using Ledger.WebApi.DataAccess;
 using Ledger.WebApi.Requests;
-using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Ledger.WebApi.RequestHandlers
 {
-    public class BuildUserJwtTokenRequestHandler : IRequestHandler<BuildUserJwtTokenRequest, BuildUserJwtTokenResponse>
+    public class BuildUserJwtTokenRequestHandler : RequestHandler<BuildUserJwtTokenRequest, BuildUserJwtTokenResponse>
     {
         public const string UserIdClaimName = "UserId";
 
@@ -29,7 +28,7 @@ namespace Ledger.WebApi.RequestHandlers
             _repository = repository;
         }
 
-        public async Task<BuildUserJwtTokenResponse> Handle(BuildUserJwtTokenRequest request, CancellationToken cancellationToken)
+        protected override async Task<BuildUserJwtTokenResponse> HandleAsync(BuildUserJwtTokenRequest request, CancellationToken cancellationToken)
         {
             var parameters = new DynamicParameters();
             parameters.Add("UserName", request.UserName);

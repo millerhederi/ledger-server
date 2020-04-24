@@ -26,6 +26,7 @@ namespace Ledger.WebApi
         {
             services.AddSingleton<IRepository, Repository>();
             services.AddScoped<IRequestContext, RequestContext>();
+            services.AddTransient<IRequestProcessingPipeline, RequestProcessingPipeline>();
 
             services.AddMediatR(Assembly.GetExecutingAssembly());
         }

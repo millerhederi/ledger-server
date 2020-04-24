@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using MediatR;
+using Ledger.WebApi.Concept;
 
 namespace Ledger.WebApi.Requests
 {

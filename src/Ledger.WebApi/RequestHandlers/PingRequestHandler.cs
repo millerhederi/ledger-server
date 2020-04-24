@@ -1,15 +1,15 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Ledger.WebApi.Concept;
 using Ledger.WebApi.Requests;
-using MediatR;
 
 namespace Ledger.WebApi.RequestHandlers
 {
-    public class PingRequestHandler : IRequestHandler<PingRequest, string>
+    public class PingRequestHandler : RequestHandler<PingRequest, string>
     {
-        public Task<string> Handle(PingRequest request, CancellationToken cancellationToken)
+        protected override Task<string> HandleAsync (PingRequest request, CancellationToken cancellationToken)
         {
-            return Task.FromResult("pong");
+            return Task.FromResult("success");
         }
     }
 }

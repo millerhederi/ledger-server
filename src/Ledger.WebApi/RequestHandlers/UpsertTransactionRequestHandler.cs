@@ -7,12 +7,11 @@ using Dapper;
 using Ledger.WebApi.Concept;
 using Ledger.WebApi.DataAccess;
 using Ledger.WebApi.Requests;
-using MediatR;
 using Transaction = Ledger.WebApi.DataAccess.Transaction;
 
 namespace Ledger.WebApi.RequestHandlers
 {
-    public class UpsertTransactionRequestHandler : IRequestHandler<UpsertTransactionRequest, UpsertTransactionResponse>
+    public class UpsertTransactionRequestHandler : RequestHandler<UpsertTransactionRequest, UpsertTransactionResponse>
     {
         private readonly IRequestContext _requestContext;
         private readonly IRepository _repository;
@@ -23,7 +22,7 @@ namespace Ledger.WebApi.RequestHandlers
             _repository = repository;
         }
 
-        public async Task<UpsertTransactionResponse> Handle(UpsertTransactionRequest request, CancellationToken cancellationToken)
+        protected override async Task<UpsertTransactionResponse> HandleAsync(UpsertTransactionRequest request, CancellationToken cancellationToken)
         {
             var currentTimestamp = DateTime.UtcNow;
 

@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Ledger.WebApi.Concept;
 using Ledger.WebApi.Requests;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,19 +11,19 @@ namespace Ledger.WebApi.Controllers
     [Route("api/[controller]")]
     public class StatusController : ControllerBase
     {
-        private readonly IMediator _mediator;
+        private readonly IRequestProcessingPipeline _pipeline;
 
-        public StatusController(IMediator mediator)
+        public StatusController(IRequestProcessingPipeline pipeline)
         {
-            _mediator = mediator;
+            _pipeline = pipeline;
         }
 
         [AllowAnonymous]
         [HttpGet]
         [Route("ping")]
-        public async Task<string> GetAsync(CancellationToken cancellationToken)
+        public async Task<ResponseEnvelope<string>> GetAsync(CancellationToken cancellationToken)
         {
-            return await _mediator.Send(new PingRequest(), cancellationToken);
+            return await _pipeline.ExecuteAsync(new PingRequest(), cancellationToken);
         }
     }
 }

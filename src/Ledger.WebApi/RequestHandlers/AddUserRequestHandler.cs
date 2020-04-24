@@ -5,11 +5,10 @@ using Dapper;
 using Ledger.WebApi.Concept;
 using Ledger.WebApi.DataAccess;
 using Ledger.WebApi.Requests;
-using MediatR;
 
 namespace Ledger.WebApi.RequestHandlers
 {
-    public class AddUserRequestHandler : IRequestHandler<AddUserRequest, AddUserResponse>
+    public class AddUserRequestHandler : RequestHandler<AddUserRequest, AddUserResponse>
     {
         private readonly IRepository _repository;
 
@@ -18,7 +17,7 @@ namespace Ledger.WebApi.RequestHandlers
             _repository = repository;
         }
 
-        public async Task<AddUserResponse> Handle(AddUserRequest request, CancellationToken cancellationToken)
+        protected override async Task<AddUserResponse> HandleAsync(AddUserRequest request, CancellationToken cancellationToken)
         {
             if (await GetIsUserNameAlreadyTakenAsync(request.UserName, cancellationToken))
             {

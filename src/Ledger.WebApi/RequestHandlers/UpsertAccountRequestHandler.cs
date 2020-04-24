@@ -4,11 +4,10 @@ using System.Threading.Tasks;
 using Ledger.WebApi.Concept;
 using Ledger.WebApi.DataAccess;
 using Ledger.WebApi.Requests;
-using MediatR;
 
 namespace Ledger.WebApi.RequestHandlers
 {
-    public class UpsertAccountRequestHandler : IRequestHandler<UpsertAccountRequest, UpsertAccountResponse>
+    public class UpsertAccountRequestHandler : RequestHandler<UpsertAccountRequest, UpsertAccountResponse>
     {
         private readonly IRepository _repository;
         private readonly IRequestContext _requestContext;
@@ -19,7 +18,7 @@ namespace Ledger.WebApi.RequestHandlers
             _requestContext = requestContext;
         }
 
-        public async Task<UpsertAccountResponse> Handle(UpsertAccountRequest request, CancellationToken cancellationToken)
+        protected override async Task<UpsertAccountResponse> HandleAsync(UpsertAccountRequest request, CancellationToken cancellationToken)
         {
             var account = new Account
             {

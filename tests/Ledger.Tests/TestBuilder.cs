@@ -4,7 +4,6 @@ using Ledger.WebApi;
 using Ledger.WebApi.Concept;
 using Ledger.WebApi.Models;
 using Ledger.WebApi.Requests;
-using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
@@ -82,7 +81,7 @@ namespace Ledger.Tests
 
         public TestBuilder<TResponse> ExecuteRequest<TResponse>(IRequest<TResponse> request)
         {
-            return WithResult(GetInstance<IMediator>().Send(request, CancellationToken.None).Result);
+            return WithResult(GetInstance<IRequestProcessingPipeline>().ExecuteAsync(request, CancellationToken.None).Result.Data);
         }
 
         public T GetInstance<T>() => _serviceProvider.GetRequiredService<T>();
