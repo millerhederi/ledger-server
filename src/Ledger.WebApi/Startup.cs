@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 namespace Ledger.WebApi
 {
@@ -62,6 +63,12 @@ namespace Ledger.WebApi
                 options.Filters.Add<RequestContextFilter>();
             });
 
+            services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo {Title = "Ledger API", Version = "v1"});
+                options.CustomSchemaIds(x => x.FullName);
+            });
+
             ConfigureIoc(services);
         }
 
@@ -72,6 +79,15 @@ namespace Ledger.WebApi
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "Ledger API v1");
+            });
 
             app.UseRouting();
 
