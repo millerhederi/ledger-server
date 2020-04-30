@@ -1,4 +1,5 @@
 ﻿using System;
+using Ledger.WebApi.Concept.Logging;
 
 namespace Ledger.WebApi.Concept
 {
@@ -7,6 +8,8 @@ namespace Ledger.WebApi.Concept
         bool IsAuthenticated { get; set; }
 
         Guid UserId { get; set; }
+
+        TelemetryEvent TelemetryEvent { get; set; }
     }
 
     public class RequestContext : IRequestContext
@@ -14,5 +17,7 @@ namespace Ledger.WebApi.Concept
         public bool IsAuthenticated { get; set; }
 
         public Guid UserId { get; set; }
+
+        public TelemetryEvent TelemetryEvent { get; set; }
     }
 }

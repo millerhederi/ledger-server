@@ -3,7 +3,9 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Ledger.WebApi.Concept;
+using Ledger.WebApi.Concept.Logging;
 using Ledger.WebApi.RequestHandlers;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Ledger.WebApi.Filters
@@ -13,6 +15,8 @@ namespace Ledger.WebApi.Filters
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             var requestContext = (IRequestContext)context.HttpContext.RequestServices.GetService(typeof(IRequestContext));
+
+            requestContext.TelemetryEvent = CreateTelemetryEvent(context);
 
             var user = context.HttpContext.User;
 
@@ -26,6 +30,22 @@ namespace Ledger.WebApi.Filters
             }
 
             await next().ConfigureAwait(false);
+        }
+
+        private static TelemetryEvent CreateTelemetryEvent(ActionContext context)
+        {
+            var telemetryEvent = new TelemetryEvent("WebRequest");
+            
+            telemetryEvent["EventId"] = Guid.NewGuid();
+            telemetryEvent["Http"] = new
+            {
+                Method = context.HttpContext.Request.Method,
+                Path = context.HttpContext.Request.Path.Value,
+                StatusCode = context.HttpContext.Response.StatusCode,
+            };
+            telemetryEvent["Timestamp"] = DateTime.UtcNow;
+
+            return telemetryEvent;
         }
 
         private static void HandleAnonymousUser(IRequestContext requestContext, ClaimsPrincipal user)

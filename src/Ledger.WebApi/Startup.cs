@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text;
 using Ledger.WebApi.Concept;
+using Ledger.WebApi.Concept.Logging;
 using Ledger.WebApi.Filters;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -27,6 +28,7 @@ namespace Ledger.WebApi
             services.AddSingleton<IRepository, Repository>();
             services.AddScoped<IRequestContext, RequestContext>();
             services.AddTransient<IRequestProcessingPipeline, RequestProcessingPipeline>();
+            services.AddTransient<ITelemetryEventLogger, TelemetryEventLogger>();
 
             services.AddMediatR(Assembly.GetExecutingAssembly());
         }
